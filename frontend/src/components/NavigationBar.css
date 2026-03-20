@@ -1,0 +1,121 @@
+.navbar {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.navbar-top {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  gap: 16px;
+}
+
+.navbar-bottom {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px 12px 20px;
+}
+
+.navbar-logo a {
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.navbar-logo {
+  flex-shrink: 0;
+}
+
+.navbar-search {
+  display: flex;
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+  margin: 0 10px;
+}
+
+.navbar-search input {
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  outline: none;
+  font-size: 14px;
+}
+
+.search-btn {
+  background: white;
+  border: none;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-main);
+}
+
+.navbar-links {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.navbar-links a {
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.navbar-links a.active {
+  opacity: 1;
+  border-bottom: 2px solid white;
+}
+
+.navbar-links a:hover {
+  opacity: 1;
+  text-decoration: none;
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.navbar-actions .button.secondary {
+  background-color: transparent !important;
+  color: white !important;
+  border: 1px solid white !important;
+}
+
+.navbar-actions .button.secondary:hover {
+  background-color: rgba(255,255,255,0.1) !important;
+}
+
+.navbar-actions .button {
+  background-color: var(--surface) !important;
+  color: var(--primary) !important;
+  border: none !important;
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-actions .button:hover {
+  background-color: var(--secondary) !important;
+  transform: translateY(-1px);
+}
