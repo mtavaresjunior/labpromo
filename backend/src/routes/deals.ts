@@ -22,13 +22,21 @@ router.get('/', async (req: Request, res: Response) => {
 
 // Create a new deal
 router.post('/', async (req: Request, res: Response) => {
-  const { title, description, price, original_price, image_url, store_name, posted_by, link, category } = req.body;
+  const { title, description, price, original_price, image_url, store_name, posted_by, link, category, product_id } = req.body;
   const dealCategory = category || 'Outros';
   try {
     const result = await pool.query(
-      'INSERT INTO deals (title, description, price, original_price, image_url, store_name, category, posted_by, likes_count, dislikes_count, link) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0, 0, $9) RETURNING *',
-      [title, description, price, original_price, image_url, store_name, dealCategory, posted_by, link]
+      'INSERT INTO deals (title, description, price, original_price, image_url, store_name, category, posted_by, likes_count, dislikes_count, link, product_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0, 0, $9, $10) RETURNING *',
+      [title, description, price, original_price, image_url, store_name, dealCategory, posted_by, link, product_id || null]
     );
+    
+    if (product_id) {
+      await pool.query(
+        'INSERT INTO price_history (product_id, price, store_name, deal_id) VALUES ($1, $2, $3, $4)',
+        [product_id, price, store_name || 'Outras', result.rows[0].id]
+      );
+    }
+    
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error(err);
@@ -39,7 +47,7 @@ router.post('/', async (req: Request, res: Response) => {
 // Update a deal
 router.put('/:id', async (req: Request, res: Response) => {
   const dealId = req.params.id;
-  const { title, description, price, original_price, image_url, store_name, link, category, user_id } = req.body;
+  const { title, description, price, original_price, image_url, store_name, link, category, user_id, product_id } = req.body;
   const dealCategory = category || 'Outros';
   try {
     // Basic verification could be added here, but frontend checks it. Better practice is to check via DB query:
@@ -54,9 +62,17 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     const result = await pool.query(
-      'UPDATE deals SET title = $1, description = $2, price = $3, original_price = $4, image_url = $5, store_name = $6, link = $7, category = $8 WHERE id = $9 RETURNING *',
-      [title, description, price, original_price, image_url, store_name, link, dealCategory, dealId]
+      'UPDATE deals SET title = $1, description = $2, price = $3, original_price = $4, image_url = $5, store_name = $6, link = $7, category = $8, product_id = $9 WHERE id = $10 RETURNING *',
+      [title, description, price, original_price, image_url, store_name, link, dealCategory, product_id || null, dealId]
     );
+    
+    if (product_id) {
+      await pool.query(
+        'INSERT INTO price_history (product_id, price, store_name, deal_id) VALUES ($1, $2, $3, $4)',
+        [product_id, price, store_name || 'Outras', dealId]
+      );
+    }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);

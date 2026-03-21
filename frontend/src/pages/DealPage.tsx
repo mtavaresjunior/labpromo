@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import CreateDealModal from '../components/CreateDealModal';
 import { formatTimeAgo } from '../utils/formatTime';
 import './DealPage.css';
@@ -17,6 +18,7 @@ interface Deal {
   created_at: string;
   link?: string;
   posted_by: number;
+  product_id?: number | null;
 }
 
 interface Comment {
@@ -42,6 +44,7 @@ const DealPage: React.FC = () => {
   const [replyContent, setReplyContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [priceHistory, setPriceHistory] = useState<any[]>([]);
   
   const [isFavorite, setIsFavorite] = useState(false);
   const [userDealVote, setUserDealVote] = useState<1 | -1 | null>(null);
@@ -192,7 +195,27 @@ const DealPage: React.FC = () => {
         const deals = await dealsRes.json();
         const foundDeal = deals.find((d: any) => d.id === dealId);
         
-        if (foundDeal) setDeal(foundDeal);
+        if (foundDeal) {
+          setDeal(foundDeal);
+          // Fetch Product History if linked
+          if (foundDeal.product_id) {
+            try {
+              const histRes = await fetch(`${url}/products/${foundDeal.product_id}/history`);
+              if (histRes.ok) {
+                const histData = await histRes.json();
+                // Format dates for the chart
+                const formattedHist = histData.map((h: any) => ({
+                    ...h,
+                    date: new Date(h.recorded_at).toLocaleDateString(),
+                    preco: Number(h.price)
+                }));
+                setPriceHistory(formattedHist);
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          }
+        }
 
         // Fetch Comments
         const commentsRes = await fetch(`${url}/comments/deal/${dealId}`);
@@ -377,6 +400,24 @@ const DealPage: React.FC = () => {
           </div>
           
           <p className="deal-page-description">{deal.description}</p>
+          
+          {priceHistory.length > 0 && (
+            <div className="deal-price-history" style={{ marginTop: '24px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', color: '#1e293b' }}>Histórico de Preços</h3>
+              <div style={{ width: '100%', height: 250 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={priceHistory} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="date" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+                    <YAxis dataKey="preco" tick={{fontSize: 12}} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
+                    <Tooltip formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'Preço']} labelStyle={{color: '#333'}} />
+                    <Line type="monotone" dataKey="preco" stroke="#0056b3" strokeWidth={3} dot={{ r: 4, fill: '#0056b3' }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
           <div className="deal-page-actions" style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
             <button className={`button ${isFavorite ? 'secondary' : ''}`} onClick={toggleFavorite} style={{ flex: 1 }}>
               {isFavorite ? '❤️ Remover dos Favoritos' : '🤍 Adicionar aos Favoritos'}

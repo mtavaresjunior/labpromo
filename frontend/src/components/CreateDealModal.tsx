@@ -23,6 +23,22 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [productQuery, setProductQuery] = useState('');
+  const [productSuggestions, setProductSuggestions] = useState<any[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+
+  React.useEffect(() => {
+    if (productQuery.length > 2 && !selectedProduct) {
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
+      fetch(`${url}/products/search?q=${encodeURIComponent(productQuery)}`)
+        .then(res => res.json())
+        .then(data => setProductSuggestions(data))
+        .catch(err => console.error(err));
+    } else {
+      setProductSuggestions([]);
+    }
+  }, [productQuery, selectedProduct]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -43,10 +59,22 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
       const method = initialData ? 'PUT' : 'POST';
       const endpoint = initialData ? `${url}/deals/${initialData.id}` : `${url}/deals`;
 
+      let finalProductId = selectedProduct?.id || initialData?.product_id;
+      
+      if (!selectedProduct && productQuery.trim() !== '') {
+        const prodRes = await fetch(`${url}/products`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: productQuery.trim(), category: formData.category })
+        });
+        const newProd = await prodRes.json();
+        if (prodRes.ok) finalProductId = newProd.id;
+      }
+
       const res = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, posted_by: user.id, user_id: user.id })
+        body: JSON.stringify({ ...formData, posted_by: user.id, user_id: user.id, product_id: finalProductId })
       });
 
       const data = await res.json();
@@ -72,8 +100,28 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
         {error && <div className="modal-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="modal-form grid">
+          <div className="form-group full" style={{ position: 'relative' }}>
+            <label>Produto Associado (Busque ou digite para criar novo) - Opcional</label>
+            <input 
+              type="text" 
+              placeholder="Ex: RTX 4060 Asus" 
+              value={productQuery} 
+              onChange={(e) => { setProductQuery(e.target.value); setSelectedProduct(null); }} 
+              autoComplete="off"
+            />
+            {productSuggestions.length > 0 && (
+              <ul style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid #ccc', zIndex: 10, listStyle: 'none', padding: 0, margin: 0, maxHeight: 150, overflowY: 'auto' }}>
+                {productSuggestions.map(p => (
+                  <li key={p.id} style={{ padding: '8px', cursor: 'pointer', borderBottom: '1px solid #eee' }} onClick={() => { setSelectedProduct(p); setProductQuery(p.name); }}>
+                    {p.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <div className="form-group full">
-            <label>Título</label>
+            <label>Título da Promoção</label>
             <input name="title" required value={formData.title} onChange={handleChange} />
           </div>
           

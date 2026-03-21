@@ -26,6 +26,7 @@ pool.connect()
 import dealRoutes from './routes/deals';
 import commentRoutes from './routes/comments';
 import userRoutes from './routes/users';
+import productRoutes from './routes/products';
 
 // Basic route
 app.get('/api/health', (req: Request, res: Response) => {
@@ -35,6 +36,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 app.use('/api/deals', dealRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
 
 // Start server
 app.listen(port, () => {
