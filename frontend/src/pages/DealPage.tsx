@@ -368,7 +368,7 @@ const DealPage: React.FC = () => {
       
       <div className="deal-details-card">
         <div className="deal-details-image" style={{ position: 'relative' }}>
-          <img src={deal.image_url} alt={deal.title} />
+          <img src={deal.image_url} alt={deal.title} referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x600/e2e8f0/475569?text=Sem+Foto'; }} />
           <div className="deal-votes-container" style={{ position: 'absolute', bottom: '16px', right: '16px', display: 'flex', gap: '8px', background: 'rgba(255, 255, 255, 0.9)', padding: '8px 12px', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
             <button 
               onClick={() => handleDealVote('up')}

@@ -131,7 +131,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
               {searchResults.length > 0 ? (
                 searchResults.map(deal => (
                   <div key={deal.id} className="search-result-item" onClick={() => navigate(`/deal/${deal.id}`)}>
-                    <img src={deal.image_url} alt={deal.title} className="search-result-img" />
+                    <img src={deal.image_url} alt={deal.title} className="search-result-img" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/e2e8f0/475569?text=Sem+Foto'; }} />
                     <div className="search-result-info">
                       <div className="search-result-title">{deal.title}</div>
                       <div className="search-result-price">R$ {parseFloat(deal.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
