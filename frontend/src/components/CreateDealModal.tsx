@@ -16,13 +16,14 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
     original_price: initialData?.original_price || '',
     image_url: initialData?.image_url || '',
     store_name: initialData?.store_name || '',
+    category: initialData?.category || 'Outros',
     description: initialData?.description || '',
     link: initialData?.link || ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -86,12 +87,28 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
             <input type="number" step="0.01" name="original_price" value={formData.original_price} onChange={handleChange} />
           </div>
 
-          <div className="form-group">
+          <div className="form-group border-right">
             <label>Nome da Loja</label>
             <input name="store_name" required value={formData.store_name} onChange={handleChange} />
           </div>
 
           <div className="form-group">
+            <label>Categoria</label>
+            <select name="category" required value={formData.category} onChange={handleChange} style={{ width: '100%', padding: '0.8rem', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }}>
+              <option value="Placa-mãe">Placa-mãe</option>
+              <option value="Processador">Processador</option>
+              <option value="Memória RAM">Memória RAM</option>
+              <option value="Armazenamento">Armazenamento (HD/SSD)</option>
+              <option value="Placa de Vídeo">Placa de Vídeo</option>
+              <option value="Fonte">Fonte de Alimentação</option>
+              <option value="Gabinete">Gabinete</option>
+              <option value="Periféricos">Periféricos</option>
+              <option value="Monitor">Monitor</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+          
+          <div className="form-group border-right">
             <label>Link do Produto</label>
             <input name="link" type="url" required value={formData.link} onChange={handleChange} />
           </div>

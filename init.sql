@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS deals (
     likes_count INTEGER DEFAULT 0,
     dislikes_count INTEGER DEFAULT 0,
     store_name VARCHAR(100),
+    category VARCHAR(100) DEFAULT 'Outros',
     link VARCHAR(255),
     posted_by INTEGER REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -16,6 +16,7 @@ interface Deal {
   username: string;
   created_at: string;
   comments_count?: number;
+  category?: string;
   link?: string;
 }
 
@@ -58,9 +59,9 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
     removeAccents(d.description?.toLowerCase() || '').includes(normalizedQuery)
   );
 
-  // Apply mock category filter if needed
-  if (category === 'Cupons') {
-    filteredDeals = filteredDeals.filter(d => removeAccents(d.title.toLowerCase()).includes('cupom'));
+  // Apply category filter
+  if (category && category !== 'Todas' && category !== 'Promocoes') {
+    filteredDeals = filteredDeals.filter(d => d.category === category);
   }
 
   // Apply sorting filter

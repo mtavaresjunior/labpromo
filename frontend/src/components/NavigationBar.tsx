@@ -11,6 +11,20 @@ interface NavigationBarProps {
   onLogout?: () => void;
 }
 
+const HARDWARE_CATEGORIES = [
+  'Todas',
+  'Placa-mãe',
+  'Processador',
+  'Memória RAM',
+  'Armazenamento',
+  'Placa de Vídeo',
+  'Fonte',
+  'Gabinete',
+  'Periféricos',
+  'Monitor',
+  'Outros'
+];
+
 const NavigationBar: React.FC<NavigationBarProps> = ({ 
 //...
   currentCategory,
@@ -56,14 +70,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     e.preventDefault();
     const params = new URLSearchParams();
     if (inputValue) params.set('q', inputValue);
-    if (currentCategory && currentCategory !== 'Promocoes') params.set('category', currentCategory);
+    if (currentCategory && currentCategory !== 'Todas') params.set('category', currentCategory);
     navigate(`/?${params.toString()}`);
   };
 
   const handleCategoryClick = (category: string) => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('q', searchQuery);
-    if (category !== 'Promocoes') params.set('category', category);
+    if (category !== 'Todas') params.set('category', category);
     navigate(`/?${params.toString()}`);
   };
 
@@ -146,31 +160,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
       </div>
 
       <div className="navbar-bottom">
-        <ul className="navbar-links">
-          <li>
-            <a 
-              className={currentCategory === 'Promocoes' ? 'active' : ''} 
-              onClick={() => handleCategoryClick('Promocoes')}
-            >Promoções</a>
-          </li>
-          <li>
-            <a 
-              className={currentCategory === 'Cupons' ? 'active' : ''} 
-              onClick={() => handleCategoryClick('Cupons')}
-            >Cupons</a>
-          </li>
-          <li>
-            <a 
-              className={currentCategory === 'Discussoes' ? 'active' : ''} 
-              onClick={() => handleCategoryClick('Discussoes')}
-            >Discussões</a>
-          </li>
-          <li>
-            <a 
-              className={currentCategory === 'Alertas' ? 'active' : ''} 
-              onClick={() => handleCategoryClick('Alertas')}
-            >Alertas</a>
-          </li>
+        <ul className="navbar-links" style={{ overflowX: 'auto', whiteSpace: 'nowrap', display: 'flex', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+          {HARDWARE_CATEGORIES.map(cat => (
+            <li key={cat}>
+              <a 
+                className={currentCategory === cat || (!currentCategory && cat === 'Todas') ? 'active' : ''} 
+                onClick={() => handleCategoryClick(cat)}
+               >{cat}</a>
+            </li>
+          ))}
         </ul>
       </div>
     </nav>
