@@ -6,7 +6,13 @@ const router = express.Router();
 // Get all deals
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = await pool.query('SELECT deals.*, users.username FROM deals JOIN users ON deals.posted_by = users.id ORDER BY created_at DESC');
+    const result = await pool.query(`
+      SELECT deals.*, users.username,
+             (SELECT COUNT(*) FROM comments WHERE comments.deal_id = deals.id) as comments_count
+      FROM deals 
+      JOIN users ON deals.posted_by = users.id 
+      ORDER BY created_at DESC
+    `);
     res.json(result.rows);
   } catch (err) {
     console.error(err);

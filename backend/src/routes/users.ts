@@ -98,7 +98,9 @@ router.get('/:id/deals', async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
-      'SELECT deals.*, users.username FROM deals JOIN users ON deals.posted_by = users.id WHERE posted_by = $1 ORDER BY created_at DESC',
+      `SELECT deals.*, users.username,
+              (SELECT COUNT(*) FROM comments WHERE comments.deal_id = deals.id) as comments_count
+       FROM deals JOIN users ON deals.posted_by = users.id WHERE posted_by = $1 ORDER BY created_at DESC`,
       [id]
     );
     res.json(result.rows);
@@ -113,7 +115,9 @@ router.get('/:id/favorites', async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
-      'SELECT deals.*, users.username FROM favorites JOIN deals ON favorites.deal_id = deals.id JOIN users ON deals.posted_by = users.id WHERE favorites.user_id = $1 ORDER BY favorites.created_at DESC',
+      `SELECT deals.*, users.username,
+              (SELECT COUNT(*) FROM comments WHERE comments.deal_id = deals.id) as comments_count
+       FROM favorites JOIN deals ON favorites.deal_id = deals.id JOIN users ON deals.posted_by = users.id WHERE favorites.user_id = $1 ORDER BY favorites.created_at DESC`,
       [id]
     );
     res.json(result.rows);

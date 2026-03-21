@@ -152,7 +152,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ initialTab, onLogout }) => {
               likesCount={deal.likes_count}
               dislikesCount={deal.dislikes_count}
               username={deal.username}
-              commentsCount={0}
+              commentsCount={deal.comments_count || 0}
               link={deal.link}
               onClick={() => navigate(`/deal/${deal.id}`)}
             />
