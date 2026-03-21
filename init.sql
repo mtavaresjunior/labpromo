@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) DEFAULT '123456',
     avatar_url VARCHAR(255),
+    is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS deals (
     image_url VARCHAR(255),
     temperature INTEGER DEFAULT 0,
     store_name VARCHAR(100),
+    link VARCHAR(255),
     posted_by INTEGER REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -25,6 +27,7 @@ CREATE TABLE IF NOT EXISTS comments (
     deal_id INTEGER REFERENCES deals(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id),
     content TEXT NOT NULL,
+    parent_id INTEGER REFERENCES comments(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -37,9 +40,9 @@ CREATE TABLE IF NOT EXISTS favorites (
 );
 
 -- Seed Initial Data
-INSERT INTO users (username, email) VALUES 
-('admin', 'admin@pelando.clone'),
-('deal_hunter', 'hunter@pelando.clone')
+INSERT INTO users (username, email, is_admin) VALUES 
+('admin', 'admin@pelando.clone', TRUE),
+('deal_hunter', 'hunter@pelando.clone', FALSE)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO deals (title, description, price, original_price, image_url, temperature, store_name, posted_by) VALUES 
