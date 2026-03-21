@@ -59,36 +59,38 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
 
         <div className="navbar-actions">
           {loggedInUser ? (
-            <div className="profile-menu-container" style={{ position: 'relative' }}>
-              <button 
-                className="button secondary profile-btn" 
-                onClick={() => setShowDropdown(!showDropdown)} 
-                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px' }}
-              >
-                <img src={loggedInUser.avatar_url || '/default-avatar.png'} alt="Avatar" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />
-                {loggedInUser.username}
-              </button>
-              {showDropdown && (
-                <div className="profile-dropdown" style={{
-                  position: 'absolute', top: '100%', right: 0, marginTop: '8px',
-                  backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 10, minWidth: '150px'
-                }}>
-                  <button onMouseDown={() => { navigate('/profile'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Meu Perfil</button>
-                  <button onMouseDown={() => { navigate('/profile/posts'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Minhas Promoções</button>
-                  <button onMouseDown={() => { navigate('/profile/favorites'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Favoritos</button>
-                  {loggedInUser?.is_admin && (
-                    <button onMouseDown={() => { navigate('/admin'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#0056b3', fontWeight: 'bold' }}>Painel Admin</button>
-                  )}
-                  <button onMouseDown={() => { if(onLogout) onLogout(); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', color: '#d32f2f' }}>Sair</button>
-                </div>
-              )}
-            </div>
+            <>
+              <button className="button" onClick={onCreateDealClick}>Enviar promoção</button>
+              <div className="profile-menu-container" style={{ position: 'relative' }}>
+                <button 
+                  className="button secondary profile-btn" 
+                  onClick={() => setShowDropdown(!showDropdown)} 
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px' }}
+                >
+                  <img src={loggedInUser.avatar_url || '/default-avatar.png'} alt="Avatar" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />
+                  {loggedInUser.username}
+                </button>
+                {showDropdown && (
+                  <div className="profile-dropdown" style={{
+                    position: 'absolute', top: '100%', right: 0, marginTop: '8px',
+                    backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 10, minWidth: '150px'
+                  }}>
+                    <button onMouseDown={() => { navigate('/profile'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Meu Perfil</button>
+                    <button onMouseDown={() => { navigate('/profile/posts'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Minhas Promoções</button>
+                    <button onMouseDown={() => { navigate('/profile/favorites'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Favoritos</button>
+                    {loggedInUser?.is_admin && (
+                      <button onMouseDown={() => { navigate('/admin'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#0056b3', fontWeight: 'bold' }}>Painel Admin</button>
+                    )}
+                    <button onMouseDown={() => { if(onLogout) onLogout(); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', color: '#d32f2f' }}>Sair</button>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <button className="button secondary" onClick={onLoginClick}>Entrar / Cadastrar</button>
           )}
-          <button className="button" onClick={onCreateDealClick}>Enviar promoção</button>
         </div>
       </div>
 
