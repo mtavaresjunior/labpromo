@@ -10,7 +10,8 @@ interface Deal {
   price: string;
   original_price: string;
   image_url: string;
-  temperature: number;
+  likes_count: number;
+  dislikes_count: number;
   store_name: string;
   username: string;
   created_at: string;
@@ -64,7 +65,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
 
   // Apply sorting filter
   if (filter === 'quentes') {
-    filteredDeals.sort((a, b) => b.temperature - a.temperature);
+    filteredDeals.sort((a, b) => (b.likes_count - b.dislikes_count) - (a.likes_count - a.dislikes_count));
   } else if (filter === 'recentes') {
     filteredDeals.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   } else if (filter === 'comentados') {
@@ -107,7 +108,8 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
                   price={deal.price}
                   originalPrice={deal.original_price}
                   image={deal.image_url}
-                  temperature={deal.temperature}
+                  likesCount={deal.likes_count}
+                  dislikesCount={deal.dislikes_count}
                   store={deal.store_name}
                   username={deal.username}
                   commentsCount={deal.comments_count || 0}

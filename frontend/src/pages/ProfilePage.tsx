@@ -149,7 +149,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ initialTab, onLogout }) => {
               originalPrice={deal.original_price}
               image={deal.image_url}
               store={deal.store_name}
-              temperature={deal.temperature}
+              likesCount={deal.likes_count}
+              dislikesCount={deal.dislikes_count}
               username={deal.username}
               commentsCount={0}
               link={deal.link}

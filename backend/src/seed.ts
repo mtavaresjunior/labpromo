@@ -75,14 +75,13 @@ async function seed() {
         
         const store = stores[Math.floor(Math.random() * stores.length)];
         const poster = userIds[Math.floor(Math.random() * userIds.length)];
-        const temp = Math.floor(Math.random() * 600) - 50; // -50 to 550
         const link = `https://www.${store.replace(/ /g, '').toLowerCase()}.com.br/produto/${Math.floor(Math.random()*1000000)}`;
         const image_url = `https://picsum.photos/seed/${encodeURIComponent(title)}/300/300`;
 
         try {
           const res = await client.query(
-              'INSERT INTO deals (title, description, price, original_price, image_url, temperature, store_name, posted_by, link) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
-              [title, desc, price, originalPrice, image_url, temp, store, poster, link]
+              'INSERT INTO deals (title, description, price, original_price, image_url, likes_count, dislikes_count, store_name, posted_by, link) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
+              [title, desc, price, originalPrice, image_url, 0, 0, store, poster, link]
           );
           dealIds.push(res.rows[0].id);
         } catch(e) { /* ignore constraint errors if ID doesn't exist etc */ }

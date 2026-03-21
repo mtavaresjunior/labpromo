@@ -33,25 +33,7 @@
   padding: 16px;
 }
 
-.temperature {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-weight: 700;
-  font-size: 14px;
-  color: white;
-  box-shadow: var(--shadow-sm);
-}
 
-.temperature.hot {
-  background-color: var(--hot);
-}
-
-.temperature.cold {
-  background-color: var(--cold);
-}
 
 .deal-content {
   padding: 16px;

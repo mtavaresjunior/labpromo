@@ -10,7 +10,8 @@ interface Deal {
   price: string;
   original_price: string;
   image_url: string;
-  temperature: number;
+  likes_count: number;
+  dislikes_count: number;
   username: string;
   created_at: string;
   link?: string;
@@ -22,6 +23,8 @@ interface Comment {
   deal_id: number;
   user_id: number;
   content: string;
+  likes_count: number;
+  dislikes_count: number;
   created_at: string;
   username: string;
   parent_id?: number;
@@ -40,6 +43,8 @@ const DealPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   
   const [isFavorite, setIsFavorite] = useState(false);
+  const [userDealVote, setUserDealVote] = useState<1 | -1 | null>(null);
+  const [userCommentVotes, setUserCommentVotes] = useState<Record<number, 1 | -1>>({});
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
 
   useEffect(() => {
@@ -193,6 +198,22 @@ const DealPage: React.FC = () => {
         const commentsData = await commentsRes.json();
         setComments(commentsData);
 
+        if (loggedInUser) {
+           const userVotesRes = await fetch(`${url}/deals/user-votes/${loggedInUser.id}`);
+           if (userVotesRes.ok) {
+             const userVotes = await userVotesRes.json();
+             const dealVote = userVotes.find((v:any) => v.deal_id === dealId);
+             if (dealVote) setUserDealVote(dealVote.vote_type);
+           }
+
+           const commentVotesRes = await fetch(`${url}/comments/user-votes/${loggedInUser.id}`);
+           if (commentVotesRes.ok) {
+             const commentVotes = await commentVotesRes.json();
+             const cvMap: Record<number, 1 | -1> = {};
+             commentVotes.forEach((v:any) => cvMap[v.comment_id] = v.vote_type);
+             setUserCommentVotes(cvMap);
+           }
+        }
       } catch (error) {
         console.error("Error fetching deal data:", error);
       } finally {
@@ -201,7 +222,51 @@ const DealPage: React.FC = () => {
     };
 
     fetchDealData();
-  }, [dealId]);
+  }, [dealId, loggedInUser]);
+
+  const handleDealVote = async (vote: 'up' | 'down') => {
+    if (!loggedInUser) return alert('Faça login para avaliar');
+    try {
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const res = await fetch(`${url}/deals/${dealId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: loggedInUser.id, vote })
+      });
+      if (res.ok) {
+        const updatedDeal = await res.json();
+        setDeal(prev => prev ? { ...prev, likes_count: updatedDeal.likes_count, dislikes_count: updatedDeal.dislikes_count } : null);
+        
+        const voteType = vote === 'up' ? 1 : -1;
+        if (userDealVote === voteType) setUserDealVote(null);
+        else setUserDealVote(voteType);
+      }
+    } catch(e) {}
+  };
+
+  const handleCommentVote = async (commentId: number, vote: 'up' | 'down') => {
+    if (!loggedInUser) return alert('Faça login para avaliar');
+    try {
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const res = await fetch(`${url}/comments/${commentId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: loggedInUser.id, vote })
+      });
+      if (res.ok) {
+        const updatedComment = await res.json();
+        setComments(comments.map(c => c.id === commentId ? { ...c, likes_count: updatedComment.likes_count, dislikes_count: updatedComment.dislikes_count } : c));
+        
+        const voteType = vote === 'up' ? 1 : -1;
+        setUserCommentVotes(prev => {
+          const newVotes = { ...prev };
+          if (newVotes[commentId] === voteType) delete newVotes[commentId];
+          else newVotes[commentId] = voteType;
+          return newVotes;
+        });
+      }
+    } catch(e) {}
+  };
 
   if (loading) return <div className="loading-state">Carregando detalhes...</div>;
   if (!deal) return <div className="loading-state">Promoção não encontrada. <button onClick={() => navigate('/')}>Voltar</button></div>;
@@ -217,6 +282,22 @@ const DealPage: React.FC = () => {
           {c.username}
         </div>
         <div className="comment-content" style={{ marginTop: '4px' }}>{c.content}</div>
+        <div className="comment-actions" style={{ display: 'flex', gap: '8px', marginTop: '8px', alignItems: 'center' }}>
+          <button 
+            onClick={() => handleCommentVote(c.id, 'up')} 
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: userCommentVotes[c.id] === 1 ? '#e3f2fd' : 'none', border: '1px solid #ddd', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', color: userCommentVotes[c.id] === 1 ? '#0056b3' : '#555' }}
+            title="Gostei"
+          >
+            👍 {c.likes_count || 0}
+          </button>
+          <button 
+            onClick={() => handleCommentVote(c.id, 'down')} 
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: userCommentVotes[c.id] === -1 ? '#ffebee' : 'none', border: '1px solid #ddd', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', color: userCommentVotes[c.id] === -1 ? '#d32f2f' : '#555' }}
+            title="Não gostei"
+          >
+            👎 {c.dislikes_count || 0}
+          </button>
+        </div>
         <div className="comment-footer" style={{ display: 'flex', gap: '16px', alignItems: 'center', fontSize: '0.8rem', color: '#666', marginTop: '8px' }}>
           <div className="comment-date">{new Date(c.created_at).toLocaleDateString()}</div>
           <button className="button-text" style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, color: '#0056b3' }} onClick={() => { setReplyingTo(replyingTo === c.id ? null : c.id); setReplyContent(''); }}>
@@ -262,10 +343,21 @@ const DealPage: React.FC = () => {
       <button className="back-btn" onClick={() => navigate(-1)}>&larr; Voltar</button>
       
       <div className="deal-details-card">
-        <div className="deal-details-image">
+        <div className="deal-details-image" style={{ position: 'relative' }}>
           <img src={deal.image_url} alt={deal.title} />
-          <div className={`temperature badge ${deal.temperature > 50 ? 'hot' : 'cold'}`}>
-             {deal.temperature}°
+          <div className="deal-votes-container" style={{ position: 'absolute', bottom: '16px', right: '16px', display: 'flex', gap: '8px', background: 'rgba(255, 255, 255, 0.9)', padding: '8px 12px', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+            <button 
+              onClick={() => handleDealVote('up')}
+              style={{ background: userDealVote === 1 ? '#e3f2fd' : 'none', border: 'none', display: 'flex', gap: '6px', alignItems: 'center', cursor: 'pointer', fontSize: '1rem', color: userDealVote === 1 ? '#0056b3' : '#333', padding: '4px 8px', borderRadius: '8px' }}
+            >
+              👍 <strong>{deal.likes_count}</strong>
+            </button>
+            <button 
+              onClick={() => handleDealVote('down')}
+              style={{ background: userDealVote === -1 ? '#ffebee' : 'none', border: 'none', display: 'flex', gap: '6px', alignItems: 'center', cursor: 'pointer', fontSize: '1rem', color: userDealVote === -1 ? '#d32f2f' : '#333', padding: '4px 8px', borderRadius: '8px' }}
+            >
+              👎 <strong>{deal.dislikes_count}</strong>
+            </button>
           </div>
         </div>
         

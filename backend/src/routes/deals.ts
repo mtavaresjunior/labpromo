@@ -19,7 +19,7 @@ router.post('/', async (req: Request, res: Response) => {
   const { title, description, price, original_price, image_url, store_name, posted_by, link } = req.body;
   try {
     const result = await pool.query(
-      'INSERT INTO deals (title, description, price, original_price, image_url, store_name, posted_by, temperature, link) VALUES ($1, $2, $3, $4, $5, $6, $7, 0, $8) RETURNING *',
+      'INSERT INTO deals (title, description, price, original_price, image_url, store_name, posted_by, likes_count, dislikes_count, link) VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8) RETURNING *',
       [title, description, price, original_price, image_url, store_name, posted_by, link]
     );
     res.status(201).json(result.rows[0]);
@@ -82,24 +82,56 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Endpoint to upvote/downvote (temperature)
+// Endpoint to upvote/downvote
 router.post('/:id/vote', async (req: Request, res: Response) => {
   const dealId = req.params.id;
-  const { vote } = req.body; // 'up' or 'down'
+  const { user_id, vote } = req.body; // 'up' or 'down'
+
+  if (!user_id) return res.status(401).json({ error: 'User ID required to vote' });
   
   try {
-    const increment = vote === 'up' ? 1 : -1;
-    const result = await pool.query(
-      'UPDATE deals SET temperature = temperature + $1 WHERE id = $2 RETURNING *',
-      [increment, dealId]
-    );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Deal not found' });
+    const voteType = vote === 'up' ? 1 : -1;
+    const existingVoteRes = await pool.query('SELECT vote_type FROM deal_votes WHERE user_id = $1 AND deal_id = $2', [user_id, dealId]);
+    
+    if (existingVoteRes.rows.length > 0) {
+      const existingVote = existingVoteRes.rows[0].vote_type;
+      if (existingVote === voteType) {
+        // remove vote
+        await pool.query('DELETE FROM deal_votes WHERE user_id = $1 AND deal_id = $2', [user_id, dealId]);
+        if (voteType === 1) await pool.query('UPDATE deals SET likes_count = likes_count - 1 WHERE id = $1', [dealId]);
+        else await pool.query('UPDATE deals SET dislikes_count = dislikes_count - 1 WHERE id = $1', [dealId]);
+      } else {
+        // change vote
+        await pool.query('UPDATE deal_votes SET vote_type = $1 WHERE user_id = $2 AND deal_id = $3', [voteType, user_id, dealId]);
+        if (voteType === 1) await pool.query('UPDATE deals SET likes_count = likes_count + 1, dislikes_count = dislikes_count - 1 WHERE id = $1', [dealId]);
+        else await pool.query('UPDATE deals SET dislikes_count = dislikes_count + 1, likes_count = likes_count - 1 WHERE id = $1', [dealId]);
+      }
+    } else {
+      // new vote
+      await pool.query('INSERT INTO deal_votes (user_id, deal_id, vote_type) VALUES ($1, $2, $3)', [user_id, dealId, voteType]);
+      if (voteType === 1) await pool.query('UPDATE deals SET likes_count = likes_count + 1 WHERE id = $1', [dealId]);
+      else await pool.query('UPDATE deals SET dislikes_count = dislikes_count + 1 WHERE id = $1', [dealId]);
     }
+    
+    const result = await pool.query('SELECT * FROM deals WHERE id = $1', [dealId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Deal not found' });
+    
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to vote' });
+  }
+});
+
+// Endpoint to get user votes
+router.get('/user-votes/:userId', async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  try {
+    const result = await pool.query('SELECT deal_id, vote_type FROM deal_votes WHERE user_id = $1', [userId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch user votes' });
   }
 });
 

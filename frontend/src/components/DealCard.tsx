@@ -7,20 +7,22 @@ interface DealProps {
   price: string | number;
   originalPrice?: string | number;
   image: string;
-  temperature: number;
+  likesCount?: number;
+  dislikesCount?: number;
   store: string;
   commentsCount?: number;
   onClick?: () => void;
   link?: string;
 }
 
-const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, temperature, store, username, commentsCount, onClick, link }) => {
+const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, likesCount = 0, dislikesCount = 0, store, username, commentsCount, onClick, link }) => {
   return (
     <div className="deal-card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       <div className="deal-image">
         <img src={image} alt={title} />
-        <div className={`temperature ${temperature > 50 ? 'hot' : 'cold'}`}>
-          {temperature}°
+        <div className="likes-dislikes-badge" style={{ position: 'absolute', bottom: '8px', right: '8px', display: 'flex', gap: '8px', background: 'rgba(255, 255, 255, 0.9)', padding: '4px 8px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+          <span style={{ color: '#0056b3' }}>👍 {likesCount}</span>
+          <span style={{ color: '#e53935' }}>👎 {dislikesCount}</span>
         </div>
       </div>
       
