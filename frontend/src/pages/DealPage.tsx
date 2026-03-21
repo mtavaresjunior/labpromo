@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import CreateDealModal from '../components/CreateDealModal';
 import './DealPage.css';
 
@@ -26,12 +27,10 @@ interface Comment {
   parent_id?: number;
 }
 
-interface DealPageProps {
-  dealId: number;
-  onBack: () => void;
-}
-
-const DealPage: React.FC<DealPageProps> = ({ dealId, onBack }) => {
+const DealPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const dealId = parseInt(id || '0', 10);
+  const navigate = useNavigate();
   const [deal, setDeal] = useState<Deal | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -146,7 +145,7 @@ const DealPage: React.FC<DealPageProps> = ({ dealId, onBack }) => {
       
       if (res.ok) {
         alert('Promoção excluída com sucesso!');
-        onBack(); // nav back to feed
+        navigate('/'); // nav back to feed
       } else {
         const data = await res.json();
         alert(data.error || 'Erro ao excluir promoção');
@@ -205,7 +204,7 @@ const DealPage: React.FC<DealPageProps> = ({ dealId, onBack }) => {
   }, [dealId]);
 
   if (loading) return <div className="loading-state">Carregando detalhes...</div>;
-  if (!deal) return <div className="loading-state">Promoção não encontrada. <button onClick={onBack}>Voltar</button></div>;
+  if (!deal) return <div className="loading-state">Promoção não encontrada. <button onClick={() => navigate('/')}>Voltar</button></div>;
 
   const renderComment = (commentId: number, depth: number = 0) => {
     const c = comments.find(com => com.id === commentId);
@@ -260,7 +259,7 @@ const DealPage: React.FC<DealPageProps> = ({ dealId, onBack }) => {
 
   return (
     <div className="deal-page-container">
-      <button className="back-btn" onClick={onBack}>&larr; Voltar para Home</button>
+      <button className="back-btn" onClick={() => navigate(-1)}>&larr; Voltar</button>
       
       <div className="deal-details-card">
         <div className="deal-details-image">

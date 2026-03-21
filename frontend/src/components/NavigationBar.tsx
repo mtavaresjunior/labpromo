@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './NavigationBar.css';
 
 interface NavigationBarProps {
-  onSearch: (query: string) => void;
-  onNavigateHome: () => void;
-  onCategoryChange: (category: string) => void;
   currentCategory: string;
   searchQuery: string;
   loggedInUser?: any;
   onLoginClick: () => void;
   onCreateDealClick: () => void;
-  onProfileClick?: (tab: 'posts' | 'favorites' | 'edit') => void;
-  onAdminClick?: () => void;
   onLogout?: () => void;
 }
 
@@ -74,11 +70,11 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                   backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px',
                   boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 10, minWidth: '150px'
                 }}>
-                  <button onMouseDown={() => { if(onProfileClick) onProfileClick('edit'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Meu Perfil</button>
-                  <button onMouseDown={() => { if(onProfileClick) onProfileClick('posts'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Minhas Promoções</button>
-                  <button onMouseDown={() => { if(onProfileClick) onProfileClick('favorites'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Favoritos</button>
+                  <button onMouseDown={() => { navigate('/profile'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Meu Perfil</button>
+                  <button onMouseDown={() => { navigate('/profile/posts'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Minhas Promoções</button>
+                  <button onMouseDown={() => { navigate('/profile/favorites'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#333' }}>Favoritos</button>
                   {loggedInUser?.is_admin && (
-                    <button onMouseDown={() => { if(onAdminClick) onAdminClick(); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#0056b3', fontWeight: 'bold' }}>Painel Admin</button>
+                    <button onMouseDown={() => { navigate('/admin'); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', color: '#0056b3', fontWeight: 'bold' }}>Painel Admin</button>
                   )}
                   <button onMouseDown={() => { if(onLogout) onLogout(); setShowDropdown(false); }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', color: '#d32f2f' }}>Sair</button>
                 </div>
@@ -96,25 +92,25 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
           <li>
             <a 
               className={currentCategory === 'Promocoes' ? 'active' : ''} 
-              onClick={() => onCategoryChange('Promocoes')}
+              onClick={() => handleCategoryClick('Promocoes')}
             >Promoções</a>
           </li>
           <li>
             <a 
               className={currentCategory === 'Cupons' ? 'active' : ''} 
-              onClick={() => onCategoryChange('Cupons')}
+              onClick={() => handleCategoryClick('Cupons')}
             >Cupons</a>
           </li>
           <li>
             <a 
               className={currentCategory === 'Discussoes' ? 'active' : ''} 
-              onClick={() => onCategoryChange('Discussoes')}
+              onClick={() => handleCategoryClick('Discussoes')}
             >Discussões</a>
           </li>
           <li>
             <a 
               className={currentCategory === 'Alertas' ? 'active' : ''} 
-              onClick={() => onCategoryChange('Alertas')}
+              onClick={() => handleCategoryClick('Alertas')}
             >Alertas</a>
           </li>
         </ul>

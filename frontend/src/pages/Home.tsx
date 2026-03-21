@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DealCard from '../components/DealCard';
 import './Home.css';
 
@@ -13,15 +14,21 @@ interface Deal {
   store_name: string;
   username: string;
   created_at: string;
+  comments_count?: number;
+  link?: string;
 }
 
 interface HomeProps {
   searchQuery: string;
   category: string;
-  onDealClick: (id: number) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ searchQuery, category, onDealClick }) => {
+const removeAccents = (str: string) => {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
+
+const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
+  const navigate = useNavigate();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'quentes' | 'recentes' | 'comentados'>('quentes');
@@ -43,15 +50,16 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, onDealClick }) => {
     fetchDeals();
   }, []);
 
-  // Apply search query
+  // Apply fuzzy search query
+  const normalizedQuery = removeAccents(searchQuery.toLowerCase());
   let filteredDeals = deals.filter(d => 
-    d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    removeAccents(d.title.toLowerCase()).includes(normalizedQuery) ||
+    removeAccents(d.description?.toLowerCase() || '').includes(normalizedQuery)
   );
 
   // Apply mock category filter if needed
   if (category === 'Cupons') {
-    filteredDeals = filteredDeals.filter(d => d.title.toLowerCase().includes('cupom'));
+    filteredDeals = filteredDeals.filter(d => removeAccents(d.title.toLowerCase()).includes('cupom'));
   }
 
   // Apply sorting filter
@@ -92,7 +100,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, onDealClick }) => {
             <p>Nenhuma promoção encontrada.</p>
           ) : (
             filteredDeals.map(deal => (
-              <div key={deal.id} onClick={() => onDealClick(deal.id)} style={{ cursor: 'pointer' }}>
+              <div key={deal.id} onClick={() => navigate(`/deal/${deal.id}`)} style={{ cursor: 'pointer' }}>
                 <DealCard
                   id={deal.id}
                   title={deal.title}
@@ -104,7 +112,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, onDealClick }) => {
                   username={deal.username}
                   commentsCount={deal.comments_count || 0}
                   link={deal.link}
-                  onClick={() => onDealClick(deal.id)}
+                  onClick={() => navigate(`/deal/${deal.id}`)}
                 />
               </div>
             ))

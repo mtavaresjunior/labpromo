@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './ProfilePage.css';
 import DealCard from '../components/DealCard';
 
 interface ProfilePageProps {
   initialTab?: 'posts' | 'favorites' | 'edit';
-  onDealClick: (id: number) => void;
   onLogout: () => void;
 }
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ initialTab, onDealClick, onLogout }) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ initialTab, onLogout }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -152,7 +153,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ initialTab, onDealClick, onLo
               username={deal.username}
               commentsCount={0}
               link={deal.link}
-              onClick={() => onDealClick(deal.id)}
+              onClick={() => navigate(`/deal/${deal.id}`)}
             />
           ))}
         </div>

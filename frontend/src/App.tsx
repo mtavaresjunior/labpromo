@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useSearchParams } from 'react-router-dom';
 import Home from './pages/Home';
 import DealPage from './pages/DealPage';
 import ProfilePage from './pages/ProfilePage';
@@ -8,19 +9,15 @@ import CreateDealModal from './components/CreateDealModal';
 import AdminPage from './pages/AdminPage';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'deal' | 'profile' | 'admin'>('home');
-  const [selectedDealId, setSelectedDealId] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [category, setCategory] = useState('Promocoes');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q') || '';
+  const category = searchParams.get('category') || 'Promocoes';
   
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showCreateDealModal, setShowCreateDealModal] = useState(false);
   
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
-
-  const [profileTab, setProfileTab] = useState<'posts'|'favorites'|'edit'>('edit');
-
-  // Triggers refresh in Home when deal is created
   const [dealsRefreshKey, setDealsRefreshKey] = useState(0); 
 
   useEffect(() => {
@@ -28,31 +25,10 @@ function App() {
     if (user) setLoggedInUser(JSON.parse(user));
   }, []);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setCurrentView('home');
-  };
-
-  const handleNavigateHome = () => {
-    setCurrentView('home');
-    setSearchQuery('');
-    setCategory('Promocoes');
-  };
-
-  const handleCategoryChange = (cat: string) => {
-    setCategory(cat);
-    setCurrentView('home');
-  };
-
-  const handleDealClick = (id: number) => {
-    setSelectedDealId(id);
-    setCurrentView('deal');
-  };
-  
   const handleDealCreated = () => {
      setShowCreateDealModal(false);
      setDealsRefreshKey(prev => prev + 1);
-     handleNavigateHome(); // go home to see it
+     navigate('/');
   };
 
   const handleLoginSuccess = (userData: any) => {
@@ -63,46 +39,42 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('user');
     setLoggedInUser(null);
-    setCurrentView('home');
-  };
-
-  const handleProfileClick = (tab: 'posts' | 'favorites' | 'edit') => {
-    setProfileTab(tab);
-    setCurrentView('profile');
+    navigate('/');
   };
 
   return (
     <div className="home-layout">
       <NavigationBar 
-        onSearch={handleSearch} 
-        onNavigateHome={handleNavigateHome}
-        onCategoryChange={handleCategoryChange}
-        currentCategory={category}
         searchQuery={searchQuery}
+        currentCategory={category}
         loggedInUser={loggedInUser}
         onLoginClick={() => setShowAuthModal(true)}
         onCreateDealClick={() => setShowCreateDealModal(true)}
-        onProfileClick={handleProfileClick}
-        onAdminClick={() => setCurrentView('admin')}
         onLogout={handleLogout}
       />
-      {currentView === 'home' && (
-        <Home 
-          key={dealsRefreshKey}
-          searchQuery={searchQuery} 
-          category={category} 
-          onDealClick={handleDealClick} 
-        />
-      )}
-      {currentView === 'deal' && selectedDealId && (
-        <DealPage dealId={selectedDealId} onBack={handleNavigateHome} />
-      )}
-      {currentView === 'profile' && (
-        <ProfilePage initialTab={profileTab} onDealClick={handleDealClick} onLogout={handleLogout} />
-      )}
-      {currentView === 'admin' && (
-        <AdminPage loggedInUser={loggedInUser} onNavigateHome={handleNavigateHome} />
-      )}
+      
+      <Routes>
+        <Route path="/" element={
+          <Home 
+            key={dealsRefreshKey}
+            searchQuery={searchQuery} 
+            category={category} 
+          />
+        } />
+        <Route path="/deal/:id" element={<DealPage />} />
+        <Route path="/profile" element={
+          <ProfilePage initialTab="edit" onLogout={handleLogout} />
+        } />
+        <Route path="/profile/posts" element={
+          <ProfilePage initialTab="posts" onLogout={handleLogout} />
+        } />
+        <Route path="/profile/favorites" element={
+          <ProfilePage initialTab="favorites" onLogout={handleLogout} />
+        } />
+        <Route path="/admin" element={
+          <AdminPage loggedInUser={loggedInUser} />
+        } />
+      </Routes>
       
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onSuccess={handleLoginSuccess} />}
       {showCreateDealModal && <CreateDealModal onClose={() => setShowCreateDealModal(false)} onCreated={handleDealCreated} />}

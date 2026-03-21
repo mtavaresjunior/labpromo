@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AdminPage.css';
 
 interface User {
@@ -18,10 +19,10 @@ interface Deal {
 
 interface AdminPageProps {
   loggedInUser: any;
-  onNavigateHome: () => void;
 }
 
-const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser, onNavigateHome }) => {
+const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser }) => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [activeTab, setActiveTab] = useState<'users' | 'deals'>('users');
@@ -57,7 +58,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser, onNavigateHome }) =
     return (
       <div className="admin-page">
         <h2>Acesso Negado</h2>
-        <button className="button" onClick={onNavigateHome}>Voltar para o início</button>
+        <button className="button" onClick={() => navigate('/')}>Voltar para o início</button>
       </div>
     );
   }
