@@ -6,13 +6,25 @@ const router = express.Router();
 // Get all deals
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = await pool.query(`
+    const page = parseInt(req.query.page as string);
+    const limit = parseInt(req.query.limit as string);
+    
+    let queryStr = `
       SELECT deals.*, users.username,
              (SELECT COUNT(*) FROM comments WHERE comments.deal_id = deals.id) as comments_count
       FROM deals 
       JOIN users ON deals.posted_by = users.id 
       ORDER BY created_at DESC
-    `);
+    `;
+    const params: any[] = [];
+    
+    if (!isNaN(limit) && !isNaN(page)) {
+      const offset = (page - 1) * limit;
+      queryStr += ` LIMIT $1 OFFSET $2`;
+      params.push(limit, offset);
+    }
+
+    const result = await pool.query(queryStr, params);
     res.json(result.rows);
   } catch (err) {
     console.error(err);

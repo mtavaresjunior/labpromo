@@ -35,6 +35,25 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'avaliados' | 'recentes'>('recentes');
+  const [visibleCount, setVisibleCount] = useState(12);
+
+  // Scroll listener for infinite scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      // Check if we are near the bottom of the page
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+        setVisibleCount((prev) => prev + 12);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [searchQuery, category, store, filter]);
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -77,6 +96,8 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
     filteredDeals.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 
+  const displayedDeals = filteredDeals.slice(0, visibleCount);
+
   return (
     <main className="main-content">
       <header className="feed-header">
@@ -96,31 +117,38 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
       {loading ? (
         <div className="loading-state">Carregando promoções...</div>
       ) : (
-        <div className="deals-grid">
-          {filteredDeals.length === 0 ? (
-            <p>Nenhuma promoção encontrada.</p>
-          ) : (
-            filteredDeals.map(deal => (
-              <div key={deal.id}>
-                <DealCard
-                  id={deal.id}
-                  title={deal.title}
-                  price={deal.price}
-                  originalPrice={deal.original_price}
-                  image={deal.image_url}
-                  likesCount={deal.likes_count}
-                  dislikesCount={deal.dislikes_count}
-                  store={deal.store_name}
-                  username={deal.username}
-                  commentsCount={deal.comments_count || 0}
-                  link={deal.link}
-                  createdAt={deal.created_at}
-                  onClick={() => navigate(`/deal/${deal.id}`)}
-                />
-              </div>
-            ))
+        <>
+          <div className="deals-grid">
+            {displayedDeals.length === 0 ? (
+              <p>Nenhuma promoção encontrada.</p>
+            ) : (
+              displayedDeals.map(deal => (
+                <div key={deal.id}>
+                  <DealCard
+                    id={deal.id}
+                    title={deal.title}
+                    price={deal.price}
+                    originalPrice={deal.original_price}
+                    image={deal.image_url}
+                    likesCount={deal.likes_count}
+                    dislikesCount={deal.dislikes_count}
+                    store={deal.store_name}
+                    username={deal.username}
+                    commentsCount={deal.comments_count || 0}
+                    link={deal.link}
+                    createdAt={deal.created_at}
+                    onClick={() => navigate(`/deal/${deal.id}`)}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+          {displayedDeals.length < filteredDeals.length && (
+            <div style={{ textAlign: 'center', marginTop: '24px', color: '#666' }}>
+              Carregando mais...
+            </div>
           )}
-        </div>
+        </>
       )}
     </main>
   );
