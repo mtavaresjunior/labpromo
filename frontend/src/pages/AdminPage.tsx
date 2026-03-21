@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../components/Modal.css';
 import './AdminPage.css';
 
 interface User {
@@ -234,14 +235,53 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser }) => {
       </div>
 
       {editingProduct && (
-        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '16px', border: '1px solid #e2e8f0' }}>
-          <h4>{editingProduct.id ? 'Editar Produto' : 'Cadastrar Produto'}</h4>
-          <form onSubmit={handleSaveProduct} style={{ display: 'flex', gap: '8px', marginTop: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-             <input type="text" placeholder="Nome do Produto (ex: RTX 4060)" value={editingProduct.name || ''} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} style={{ flex: 2, minWidth: '200px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} required />
-             <input type="text" placeholder="Categoria (ex: Placa de Vídeo)" value={editingProduct.category || ''} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} style={{ flex: 1, minWidth: '150px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} required />
-             <button type="submit" className="button">Salvar</button>
-             <button type="button" className="button secondary" onClick={() => setEditingProduct(null)}>Cancelar</button>
-          </form>
+        <div className="modal-overlay" onClick={() => setEditingProduct(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', margin: '0 auto' }}>
+            <button className="modal-close" onClick={() => setEditingProduct(null)}>&times;</button>
+            <h2>{editingProduct.id ? 'Editar Produto' : 'Cadastrar Produto'}</h2>
+            
+            <form onSubmit={handleSaveProduct} className="modal-form" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+              <div className="form-group full">
+                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Nome do Produto (ex: RTX 4060)</label>
+                <input 
+                  type="text" 
+                  value={editingProduct.name || ''} 
+                  onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} 
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} 
+                  required 
+                />
+              </div>
+              
+              <div className="form-group full">
+                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Categoria</label>
+                <select 
+                  value={editingProduct.category || ''} 
+                  onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} 
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '1rem' }} 
+                  required
+                >
+                  <option value="Placa-mãe">Placa-mãe</option>
+                  <option value="Processador">Processador</option>
+                  <option value="Memória RAM">Memória RAM</option>
+                  <option value="Armazenamento">Armazenamento (HD/SSD)</option>
+                  <option value="Placa de Vídeo">Placa de Vídeo</option>
+                  <option value="Fonte">Fonte de Alimentação</option>
+                  <option value="Gabinete">Gabinete</option>
+                  <option value="Periféricos">Periféricos</option>
+                  <option value="Monitor">Monitor</option>
+                  <option value="Notebooks">Notebooks</option>
+                  <option value="Smartphones">Smartphones</option>
+                  <option value="TV e Áudio">TV e Áudio</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                <button type="submit" className="button" style={{ flex: 1 }}>Salvar Alterações</button>
+                <button type="button" className="button secondary" onClick={() => setEditingProduct(null)} style={{ flex: 1 }}>Cancelar</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
