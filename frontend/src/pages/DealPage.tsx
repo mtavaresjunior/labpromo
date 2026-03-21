@@ -56,7 +56,7 @@ const DealPage: React.FC = () => {
     if (!loggedInUser || !deal) return;
     const checkFav = async () => {
       try {
-        const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+        const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
         const res = await fetch(`${url}/users/${loggedInUser.id}/favorites`);
         const favs = await res.json();
         setIsFavorite(favs.some((f: any) => f.id === deal.id));
@@ -68,7 +68,7 @@ const DealPage: React.FC = () => {
   const toggleFavorite = async () => {
     if (!loggedInUser) return alert('Faça login para favoritar!');
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       if (isFavorite) {
          await fetch(`${url}/deals/${deal.id}/favorite/${loggedInUser.id}`, { method: 'DELETE' });
          setIsFavorite(false);
@@ -90,7 +90,7 @@ const DealPage: React.FC = () => {
     if (!newComment.trim()) return;
 
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/comments/deal/${dealId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,7 +117,7 @@ const DealPage: React.FC = () => {
     if (!replyContent.trim()) return;
 
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/comments/deal/${dealId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,7 +141,7 @@ const DealPage: React.FC = () => {
     if (!window.confirm('Tem certeza que deseja excluir esta promoção? Esta ação não pode ser desfeita.')) return;
 
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/deals/${dealId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -165,7 +165,7 @@ const DealPage: React.FC = () => {
     if (!window.confirm('Tem certeza que deseja excluir este comentário?')) return;
 
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/comments/${commentId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -184,7 +184,7 @@ const DealPage: React.FC = () => {
   useEffect(() => {
     const fetchDealData = async () => {
       try {
-        const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+        const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
         
         // Fetch Deals from the general list instead of creating a new endpoint just for MVP
         const dealsRes = await fetch(`${url}/deals`);
@@ -227,7 +227,7 @@ const DealPage: React.FC = () => {
   const handleDealVote = async (vote: 'up' | 'down') => {
     if (!loggedInUser) return alert('Faça login para avaliar');
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/deals/${dealId}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -247,7 +247,7 @@ const DealPage: React.FC = () => {
   const handleCommentVote = async (commentId: number, vote: 'up' | 'down') => {
     if (!loggedInUser) return alert('Faça login para avaliar');
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/comments/${commentId}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

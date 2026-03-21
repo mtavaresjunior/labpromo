@@ -20,7 +20,7 @@ const upload = multer({ storage });
 
 router.post('/:id/avatar', upload.single('avatar'), async (req: Request, res: Response) => {
   if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
-  const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+  const backendUrl = process.env.BACKEND_URL || 'http://localhost:5172';
   const avatarUrl = `${backendUrl}/uploads/${req.file.filename}`;
   try {
     const result = await pool.query(

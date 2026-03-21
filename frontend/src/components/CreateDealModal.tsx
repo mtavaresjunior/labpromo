@@ -30,7 +30,7 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
     setError('');
 
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       
       // Get user from local storage
       const userStr = localStorage.getItem('user');

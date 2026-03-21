@@ -41,7 +41,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ initialTab, onLogout }) => {
   const fetchDeals = async () => {
     setLoadingDeals(true);
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const endpoint = activeTab === 'posts' ? `/users/${user.id}/deals` : `/users/${user.id}/favorites`;
       const res = await fetch(`${url}${endpoint}`);
       const data = await res.json();
@@ -57,7 +57,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ initialTab, onLogout }) => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       
       let updatedUser = user;
 

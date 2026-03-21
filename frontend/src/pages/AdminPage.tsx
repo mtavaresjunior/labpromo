@@ -28,7 +28,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser }) => {
   const [activeTab, setActiveTab] = useState<'users' | 'deals'>('users');
   const [loading, setLoading] = useState(true);
 
-  const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
 
   const fetchData = async () => {
     setLoading(true);

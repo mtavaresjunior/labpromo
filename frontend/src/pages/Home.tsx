@@ -37,7 +37,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
   useEffect(() => {
     const fetchDeals = async () => {
       try {
-        const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+        const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
         const res = await fetch(`${url}/deals`);
         const data = await res.json();
         setDeals(data);

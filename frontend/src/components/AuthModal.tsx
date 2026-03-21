@@ -20,7 +20,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
     setError('');
 
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const endpoint = isLogin ? '/users/login' : '/users/register';
       const payload = isLogin ? { email, password } : { email, password, username };
 

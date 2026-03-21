@@ -18,10 +18,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "5172:5172"
     environment:
       - DATABASE_URL=postgres://pelando_user:pelando_password@db:5432/pelando_db
-      - PORT=3000
+      - PORT=5172
     depends_on:
       - db
     volumes:
@@ -32,7 +32,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://meninodeti.com.br:3000/api}
+        - VITE_API_URL=${VITE_API_URL:-http://meninodeti.com.br:5172/api}
     ports:
       - "5173:5173"
     environment:
