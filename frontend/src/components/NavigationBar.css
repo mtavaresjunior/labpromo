@@ -119,3 +119,47 @@
   background-color: var(--secondary) !important;
   transform: translateY(-1px);
 }
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .navbar-top {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  
+  .navbar-logo {
+    flex: 1;
+  }
+  
+  .navbar-actions {
+    flex-shrink: 0;
+  }
+  
+  .navbar-search {
+    order: 3;
+    flex: 0 0 100%;
+    margin: 0;
+    max-width: 100%;
+  }
+  
+  .navbar-bottom {
+    padding: 0 16px 12px 16px;
+  }
+  
+  .navbar-links {
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Hide scrollbar for navbar links */
+  .navbar-links::-webkit-scrollbar {
+    display: none;
+  }
+  .navbar-links {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

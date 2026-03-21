@@ -62,3 +62,31 @@
   color: var(--text-muted);
   font-size: 18px;
 }
+
+@media (max-width: 768px) {
+  .feed-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .filters {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .filters::-webkit-scrollbar {
+    display: none;
+  }
+  .filters {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .deals-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

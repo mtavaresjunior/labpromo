@@ -175,8 +175,26 @@
   .deal-details-card {
     flex-direction: column;
   }
+  
   .deal-details-image {
     border-right: none;
     border-bottom: 1px solid var(--border);
+    padding: 16px;
+  }
+  
+  .deal-details-info {
+    padding: 20px;
+  }
+  
+  .deal-details-info h2 {
+    font-size: 20px;
+  }
+  
+  .deal-pricing .current {
+    font-size: 24px;
+  }
+  
+  .deal-comments-section {
+    padding: 20px;
   }
 }

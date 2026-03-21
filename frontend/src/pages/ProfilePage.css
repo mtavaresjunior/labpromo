@@ -112,3 +112,37 @@
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
 }
+
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 16px;
+    gap: 20px;
+  }
+  
+  .profile-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-form .button {
+    justify-self: stretch;
+    width: 100%;
+  }
+  
+  .profile-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .profile-tab {
+    white-space: nowrap;
+  }
+  
+  .profile-deals-grid {
+    grid-template-columns: 1fr;
+  }
+}
