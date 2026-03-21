@@ -78,11 +78,11 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
           <button 
             className={`filter-btn ${filter === 'recentes' ? 'active' : ''}`}
             onClick={() => setFilter('recentes')}
-          >Organizar por data: Mais recentes primeiro</button>
+          >Mais recentes</button>
           <button 
             className={`filter-btn ${filter === 'avaliados' ? 'active' : ''}`}
             onClick={() => setFilter('avaliados')}
-          >Organizar por avaliação: Os melhores avaliados (likes - dislikes) primeiro</button>
+          >Melhores avaliados</button>
         </div>
       </header>
 
