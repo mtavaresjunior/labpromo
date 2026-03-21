@@ -133,14 +133,16 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                   <img src={loggedInUser.avatar_url || '/default-avatar.png'} alt="Avatar" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />
                   {loggedInUser.username}
                 </button>
-                <div className="profile-dropdown">
-                  <button onMouseDown={() => { navigate('/profile'); }}>Meu Perfil</button>
-                  <button onMouseDown={() => { navigate('/profile/posts'); }}>Minhas Promoções</button>
-                  <button onMouseDown={() => { navigate('/profile/favorites'); }}>Favoritos</button>
-                  {loggedInUser?.is_admin && (
-                    <button onMouseDown={() => { navigate('/admin'); }} style={{ color: '#0056b3', fontWeight: 'bold' }}>Painel Admin</button>
-                  )}
-                  <button onMouseDown={() => { if(onLogout) onLogout(); }} style={{ color: '#d32f2f' }}>Sair</button>
+                <div className="profile-dropdown-wrapper">
+                  <div className="profile-dropdown">
+                    <button onMouseDown={() => { navigate('/profile'); }}>Meu Perfil</button>
+                    <button onMouseDown={() => { navigate('/profile/posts'); }}>Minhas Promoções</button>
+                    <button onMouseDown={() => { navigate('/profile/favorites'); }}>Favoritos</button>
+                    {loggedInUser?.is_admin && (
+                      <button onMouseDown={() => { navigate('/admin'); }} style={{ color: '#0056b3', fontWeight: 'bold' }}>Painel Admin</button>
+                    )}
+                    <button onMouseDown={() => { if(onLogout) onLogout(); }} style={{ color: '#d32f2f' }}>Sair</button>
+                  </div>
                 </div>
               </div>
             </>
@@ -165,19 +167,21 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
             >
               Hardware / Componentes ▾
             </a>
-            <div className="category-dropdown">
-              {HARDWARE_CATEGORIES.filter(c => c !== 'Todas').map(cat => (
-                <button 
-                  key={cat}
-                  onMouseDown={() => { handleCategoryClick(cat); }} 
-                  style={{ 
-                    color: currentCategory === cat ? '#0056b3' : '#333',
-                    fontWeight: currentCategory === cat ? '600' : 'normal'
-                  }}
-                >
-                  {cat}
-                </button>
-              ))}
+            <div className="category-dropdown-wrapper">
+              <div className="category-dropdown">
+                {HARDWARE_CATEGORIES.filter(c => c !== 'Todas').map(cat => (
+                  <button 
+                    key={cat}
+                    onMouseDown={() => { handleCategoryClick(cat); }} 
+                    style={{ 
+                      color: currentCategory === cat ? '#0056b3' : '#333',
+                      fontWeight: currentCategory === cat ? '600' : 'normal'
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
           </li>
         </ul>
