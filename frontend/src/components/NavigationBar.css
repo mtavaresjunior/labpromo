@@ -200,6 +200,66 @@
   transform: translateY(-1px);
 }
 
+/* Dropdown Menus */
+.profile-dropdown, .category-dropdown {
+  position: absolute;
+  top: 100%;
+  margin-top: 8px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-dropdown {
+  right: 0;
+  min-width: 180px;
+}
+
+.category-dropdown {
+  left: 0;
+  min-width: 220px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.profile-menu-container:hover .profile-dropdown,
+.category-menu-container:hover .category-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.profile-dropdown button, .category-dropdown button {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+
+.profile-dropdown button:hover, .category-dropdown button:hover {
+  background-color: #f5f5f5;
+}
+
+.profile-dropdown button:last-child, .category-dropdown button:last-child {
+  border-bottom: none;
+}
+
 /* Responsiveness */
 @media (max-width: 768px) {
   .navbar-top {
