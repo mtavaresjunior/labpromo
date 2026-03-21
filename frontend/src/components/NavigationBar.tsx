@@ -38,6 +38,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
   const location = useLocation();
   const [inputValue, setInputValue] = useState(searchQuery);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [deals, setDeals] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
@@ -160,15 +161,48 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
       </div>
 
       <div className="navbar-bottom">
-        <ul className="navbar-links" style={{ overflowX: 'auto', whiteSpace: 'nowrap', display: 'flex', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
-          {HARDWARE_CATEGORIES.map(cat => (
-            <li key={cat}>
-              <a 
-                className={currentCategory === cat || (!currentCategory && cat === 'Todas') ? 'active' : ''} 
-                onClick={() => handleCategoryClick(cat)}
-               >{cat}</a>
-            </li>
-          ))}
+        <ul className="navbar-links">
+          <li>
+            <a 
+              className={!currentCategory || currentCategory === 'Todas' ? 'active' : ''} 
+              onClick={() => handleCategoryClick('Todas')}
+            >Todas as Promoções</a>
+          </li>
+          <li style={{ position: 'relative' }}>
+            <a 
+              className={currentCategory && currentCategory !== 'Todas' ? 'active' : ''} 
+              onClick={(e) => { e.preventDefault(); setShowCategoryDropdown(!showCategoryDropdown); }}
+              onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+            >
+              Hardware / Componentes {showCategoryDropdown ? '▴' : '▾'}
+            </a>
+            {showCategoryDropdown && (
+              <div className="category-dropdown" style={{
+                position: 'absolute', top: '100%', left: 0, marginTop: '8px',
+                backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 10, minWidth: '220px',
+                display: 'flex', flexDirection: 'column',
+                maxHeight: '350px', overflowY: 'auto'
+              }}>
+                {HARDWARE_CATEGORIES.filter(c => c !== 'Todas').map(cat => (
+                  <button 
+                    key={cat}
+                    onMouseDown={() => { handleCategoryClick(cat); setShowCategoryDropdown(false); }} 
+                    style={{ 
+                      width: '100%', padding: '12px 16px', border: 'none', background: 'none', 
+                      textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee', 
+                      color: currentCategory === cat ? '#0056b3' : '#333',
+                      fontWeight: currentCategory === cat ? '600' : 'normal',
+                      fontSize: '0.95rem'
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+          </li>
         </ul>
       </div>
     </nav>
