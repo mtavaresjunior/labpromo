@@ -24,10 +24,12 @@ router.get('/', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   const { title, description, price, original_price, image_url, store_name, posted_by, link, category, product_id } = req.body;
   const dealCategory = category || 'Outros';
+  const origPrice = original_price === '' ? null : original_price;
+
   try {
     const result = await pool.query(
       'INSERT INTO deals (title, description, price, original_price, image_url, store_name, category, posted_by, likes_count, dislikes_count, link, product_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0, 0, $9, $10) RETURNING *',
-      [title, description, price, original_price, image_url, store_name, dealCategory, posted_by, link, product_id || null]
+      [title, description, price, origPrice, image_url, store_name, dealCategory, posted_by, link, product_id || null]
     );
     
     if (product_id) {
@@ -40,7 +42,8 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to create deal' });
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    res.status(500).json({ error: 'Failed to create deal: ' + errorMessage });
   }
 });
 
@@ -49,6 +52,8 @@ router.put('/:id', async (req: Request, res: Response) => {
   const dealId = req.params.id;
   const { title, description, price, original_price, image_url, store_name, link, category, user_id, product_id } = req.body;
   const dealCategory = category || 'Outros';
+  const origPrice = original_price === '' ? null : original_price;
+
   try {
     // Basic verification could be added here, but frontend checks it. Better practice is to check via DB query:
     const dealRes = await pool.query('SELECT posted_by FROM deals WHERE id = $1', [dealId]);
@@ -63,7 +68,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     const result = await pool.query(
       'UPDATE deals SET title = $1, description = $2, price = $3, original_price = $4, image_url = $5, store_name = $6, link = $7, category = $8, product_id = $9 WHERE id = $10 RETURNING *',
-      [title, description, price, original_price, image_url, store_name, link, dealCategory, product_id || null, dealId]
+      [title, description, price, origPrice, image_url, store_name, link, dealCategory, product_id || null, dealId]
     );
     
     if (product_id) {
@@ -76,7 +81,8 @@ router.put('/:id', async (req: Request, res: Response) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to update deal' });
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    res.status(500).json({ error: 'Failed to update deal: ' + errorMessage });
   }
 });
 
