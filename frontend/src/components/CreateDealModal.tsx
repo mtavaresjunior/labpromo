@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Modal.css';
 
 interface CreateDealModalProps {
@@ -8,6 +9,7 @@ interface CreateDealModalProps {
 }
 
 const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, initialData }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     price: initialData?.price || '',
@@ -49,8 +51,10 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro ao criar promoção');
       
-      alert(initialData ? 'Promoção atualizada com sucesso!' : 'Promoção enviada com sucesso!');
       onCreated();
+      if (!initialData) {
+        navigate(`/deal/${data.id}`);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
