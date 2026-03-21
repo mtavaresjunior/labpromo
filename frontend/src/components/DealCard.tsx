@@ -1,5 +1,6 @@
 import React from 'react';
 import './DealCard.css';
+import { formatTimeAgo } from '../utils/formatTime';
 
 interface DealProps {
   id: number;
@@ -13,9 +14,10 @@ interface DealProps {
   commentsCount?: number;
   onClick?: () => void;
   link?: string;
+  createdAt?: string;
 }
 
-const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, likesCount = 0, dislikesCount = 0, store, username, commentsCount, onClick, link }) => {
+const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, likesCount = 0, dislikesCount = 0, store, username, commentsCount, onClick, link, createdAt }) => {
   return (
     <div className="deal-card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       <div className="deal-image">
@@ -36,6 +38,7 @@ const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, lik
         <div className="deal-meta">
           <span className="store">{store}</span>
           <span className="user">por {username}</span>
+          {createdAt && <span className="time-ago" style={{ color: '#888', fontSize: '0.85rem' }}>• {formatTimeAgo(createdAt)}</span>}
         </div>
 
         <div className="deal-actions">

@@ -107,6 +107,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
                   username={deal.username}
                   commentsCount={deal.comments_count || 0}
                   link={deal.link}
+                  createdAt={deal.created_at}
                   onClick={() => navigate(`/deal/${deal.id}`)}
                 />
               </div>

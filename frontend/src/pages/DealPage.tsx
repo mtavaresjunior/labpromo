@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CreateDealModal from '../components/CreateDealModal';
+import { formatTimeAgo } from '../utils/formatTime';
 import './DealPage.css';
 
 interface Deal {
@@ -372,6 +373,7 @@ const DealPage: React.FC = () => {
           <div className="deal-meta-info">
              <span>Vendido por <strong>{deal.store_name}</strong></span>
              <span>Postado por <strong>{deal.username}</strong></span>
+             {deal.created_at && <span style={{ color: '#888', fontSize: '0.9rem' }}>• {formatTimeAgo(deal.created_at)}</span>}
           </div>
           
           <p className="deal-page-description">{deal.description}</p>
