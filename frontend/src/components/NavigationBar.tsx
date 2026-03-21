@@ -13,31 +13,36 @@ interface NavigationBarProps {
 
 const NavigationBar: React.FC<NavigationBarProps> = ({ 
 //...
-// this replace chunk is manually managed because I need to replace two things in NavigationBar. Let's do it in the next turn if needed. Oh, replacing multiple non-contiguous lines requires multi_replace. Let me do simple replace of the entire dropdown. 
-  onSearch, 
-  onNavigateHome, 
-  onCategoryChange,
   currentCategory,
   searchQuery,
   loggedInUser,
   onLoginClick,
   onCreateDealClick,
-  onProfileClick,
-  onAdminClick,
   onLogout
 }) => {
+  const navigate = useNavigate();
   const [inputValue, setInputValue] = useState(searchQuery);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(inputValue);
+    const params = new URLSearchParams();
+    if (inputValue) params.set('q', inputValue);
+    if (currentCategory && currentCategory !== 'Promocoes') params.set('category', currentCategory);
+    navigate(`/?${params.toString()}`);
+  };
+
+  const handleCategoryClick = (category: string) => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('q', searchQuery);
+    if (category !== 'Promocoes') params.set('category', category);
+    navigate(`/?${params.toString()}`);
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-top">
-        <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => onNavigateHome()}>
+        <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/')}>
           <img src="/mascote.png?v=2" alt="Mascote Menino de TI Promos" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
           <a href="#" onClick={(e) => { e.preventDefault(); }}>Menino de TI Promos</a>
         </div>
