@@ -8,6 +8,10 @@ RUN npm install
 # Copia de todo o projeto para o container (inclusive configs)
 COPY . .
 
+# Recebe a variavel de ambiente no momento do build
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Faz o build da aplicação React/Vite
 RUN npm run build
 
