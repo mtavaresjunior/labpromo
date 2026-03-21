@@ -15,7 +15,7 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
     price: initialData?.price || '',
     original_price: initialData?.original_price || '',
     image_url: initialData?.image_url || '',
-    store_name: initialData?.store_name || '',
+    store_name: initialData?.store_name || 'Outras',
     category: initialData?.category || 'Outros',
     description: initialData?.description || '',
     link: initialData?.link || ''
@@ -89,7 +89,18 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
 
           <div className="form-group border-right">
             <label>Nome da Loja</label>
-            <input name="store_name" required value={formData.store_name} onChange={handleChange} />
+            <select name="store_name" required value={formData.store_name} onChange={handleChange} style={{ width: '100%', padding: '0.8rem', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }}>
+              <option value="KaBuM!">KaBuM!</option>
+              <option value="Terabyte">Terabyte</option>
+              <option value="Pichau">Pichau</option>
+              <option value="Amazon">Amazon</option>
+              <option value="Mercado Livre">Mercado Livre</option>
+              <option value="AliExpress">AliExpress</option>
+              <option value="Fast Shop">Fast Shop</option>
+              <option value="Magazine Luiza">Magazine Luiza</option>
+              <option value="Shopee">Shopee</option>
+              <option value="Outras">Outras</option>
+            </select>
           </div>
 
           <div className="form-group">

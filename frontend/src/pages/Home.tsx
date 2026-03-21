@@ -23,13 +23,14 @@ interface Deal {
 interface HomeProps {
   searchQuery: string;
   category: string;
+  store: string;
 }
 
 const removeAccents = (str: string) => {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
-const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
+const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
   const navigate = useNavigate();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +63,11 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
   // Apply category filter
   if (category && category !== 'Todas' && category !== 'Promocoes') {
     filteredDeals = filteredDeals.filter(d => d.category === category);
+  }
+
+  // Apply store filter
+  if (store && store !== 'Todas') {
+    filteredDeals = filteredDeals.filter(d => d.store_name === store);
   }
 
   // Apply sorting filter

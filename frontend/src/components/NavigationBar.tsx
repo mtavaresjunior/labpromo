@@ -25,9 +25,23 @@ const HARDWARE_CATEGORIES = [
   'Outros'
 ];
 
+const STORES = [
+  'Todas',
+  'KaBuM!',
+  'Terabyte',
+  'Pichau',
+  'Amazon',
+  'Mercado Livre',
+  'AliExpress',
+  'Fast Shop',
+  'Magazine Luiza',
+  'Shopee',
+  'Outras'
+];
+
 const NavigationBar: React.FC<NavigationBarProps> = ({ 
-//...
   currentCategory,
+  currentStore,
   searchQuery,
   loggedInUser,
   onLoginClick,
@@ -70,6 +84,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     const params = new URLSearchParams();
     if (inputValue) params.set('q', inputValue);
     if (currentCategory && currentCategory !== 'Todas') params.set('category', currentCategory);
+    if (currentStore && currentStore !== 'Todas') params.set('store', currentStore);
     navigate(`/?${params.toString()}`);
   };
 
@@ -77,6 +92,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     const params = new URLSearchParams();
     if (searchQuery) params.set('q', searchQuery);
     if (category !== 'Todas') params.set('category', category);
+    if (currentStore && currentStore !== 'Todas') params.set('store', currentStore);
+    navigate(`/?${params.toString()}`);
+  };
+
+  const handleStoreClick = (store: string) => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('q', searchQuery);
+    if (currentCategory && currentCategory !== 'Todas') params.set('category', currentCategory);
+    if (store !== 'Todas') params.set('store', store);
     navigate(`/?${params.toString()}`);
   };
 
@@ -156,8 +180,13 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
         <ul className="navbar-links">
           <li>
             <a 
-              className={!currentCategory || currentCategory === 'Todas' ? 'active' : ''} 
-              onClick={() => handleCategoryClick('Todas')}
+              className={(!currentCategory || currentCategory === 'Todas') && (!currentStore || currentStore === 'Todas') ? 'active' : ''} 
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (searchQuery) params.set('q', searchQuery);
+                navigate(`/?${params.toString()}`);
+              }}
+              style={{ cursor: 'pointer' }}
             >Todas as Promoções</a>
           </li>
           <li className="category-menu-container" style={{ position: 'relative' }}>
@@ -179,6 +208,30 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                     }}
                   >
                     {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </li>
+          <li className="category-menu-container" style={{ position: 'relative' }}>
+            <a 
+              className={currentStore && currentStore !== 'Todas' ? 'active' : ''} 
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+            >
+              Lojas ▾
+            </a>
+            <div className="category-dropdown-wrapper">
+              <div className="category-dropdown">
+                {STORES.filter(s => s !== 'Todas').map(store => (
+                  <button 
+                    key={store}
+                    onMouseDown={() => { handleStoreClick(store); }} 
+                    style={{ 
+                      color: currentStore === store ? '#0056b3' : '#333',
+                      fontWeight: currentStore === store ? '600' : 'normal'
+                    }}
+                  >
+                    {store}
                   </button>
                 ))}
               </div>

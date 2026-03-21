@@ -13,6 +13,7 @@ function App() {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
   const category = searchParams.get('category') || 'Promocoes';
+  const store = searchParams.get('store') || '';
   
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showCreateDealModal, setShowCreateDealModal] = useState(false);
@@ -47,6 +48,7 @@ function App() {
       <NavigationBar 
         searchQuery={searchQuery}
         currentCategory={category}
+        currentStore={store}
         loggedInUser={loggedInUser}
         onLoginClick={() => setShowAuthModal(true)}
         onCreateDealClick={() => setShowCreateDealModal(true)}
@@ -59,6 +61,7 @@ function App() {
             key={dealsRefreshKey}
             searchQuery={searchQuery} 
             category={category} 
+            store={store}
           />
         } />
         <Route path="/deal/:id" element={<DealPage />} />
