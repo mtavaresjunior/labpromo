@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './NavigationBar.css';
 
@@ -24,6 +24,33 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
   const location = useLocation();
   const [inputValue, setInputValue] = useState(searchQuery);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [deals, setDeals] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
+        const res = await fetch(`${url}/deals`);
+        const data = await res.json();
+        setDeals(data);
+      } catch (err) {
+        console.error('Failed to fetch deals for search', err);
+      }
+    };
+    fetchDeals();
+  }, []);
+
+  const removeAccents = (str: string) => {
+    if (!str) return '';
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  };
+
+  const normalizedQuery = removeAccents(inputValue.toLowerCase());
+  const searchResults = inputValue.trim() ? deals.filter(d => 
+    removeAccents(d.title.toLowerCase()).includes(normalizedQuery) ||
+    removeAccents(d.description?.toLowerCase() || '').includes(normalizedQuery)
+  ) : [];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,22 +75,37 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
           <a href="#" onClick={(e) => { e.preventDefault(); }}>Menino de TI Promos</a>
         </div>
         
-        <form className="navbar-search" onSubmit={handleSearchSubmit}>
+        <form className="navbar-search" onSubmit={handleSearchSubmit} style={{ position: 'relative' }}>
           <input 
             type="text" 
             placeholder="Pesquisar promoções..." 
             value={inputValue}
+            onFocus={() => setShowSearchResults(true)}
+            onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
             onChange={(e) => {
-              const val = e.target.value;
-              setInputValue(val);
-              const params = new URLSearchParams();
-              if (val) params.set('q', val);
-              if (currentCategory && currentCategory !== 'Promocoes') params.set('category', currentCategory);
-              const isSearchActive = location.pathname === '/' && new URLSearchParams(location.search).has('q');
-              navigate(`/?${params.toString()}`, { replace: isSearchActive });
+              setInputValue(e.target.value);
+              setShowSearchResults(true);
             }}
           />
           <button type="submit" className="search-btn">🔍</button>
+
+          {showSearchResults && inputValue.trim() && (
+            <div className="search-results-dropdown">
+              {searchResults.length > 0 ? (
+                searchResults.map(deal => (
+                  <div key={deal.id} className="search-result-item" onClick={() => navigate(`/deal/${deal.id}`)}>
+                    <img src={deal.image_url} alt={deal.title} className="search-result-img" />
+                    <div className="search-result-info">
+                      <div className="search-result-title">{deal.title}</div>
+                      <div className="search-result-price">R$ {parseFloat(deal.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="search-result-item no-results">Nenhuma promoção encontrada</div>
+              )}
+            </div>
+          )}
         </form>
 
         <div className="navbar-actions">
