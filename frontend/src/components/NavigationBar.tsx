@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './NavigationBar.css';
 
 interface NavigationBarProps {
@@ -21,6 +21,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
   onLogout
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [inputValue, setInputValue] = useState(searchQuery);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -52,7 +53,15 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
             type="text" 
             placeholder="Pesquisar promoções..." 
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setInputValue(val);
+              const params = new URLSearchParams();
+              if (val) params.set('q', val);
+              if (currentCategory && currentCategory !== 'Promocoes') params.set('category', currentCategory);
+              const isSearchActive = location.pathname === '/' && new URLSearchParams(location.search).has('q');
+              navigate(`/?${params.toString()}`, { replace: isSearchActive });
+            }}
           />
           <button type="submit" className="search-btn">🔍</button>
         </form>
