@@ -17,6 +17,13 @@ interface Deal {
   username: string;
 }
 
+interface Product {
+  id: number;
+  name: string;
+  category: string;
+  created_at: string;
+}
+
 interface AdminPageProps {
   loggedInUser: any;
 }
@@ -25,23 +32,29 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser }) => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
-  const [activeTab, setActiveTab] = useState<'users' | 'deals'>('users');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [activeTab, setActiveTab] = useState<'users' | 'deals' | 'products'>('users');
   const [loading, setLoading] = useState(true);
+  
+  const [editingProduct, setEditingProduct] = useState<Product | Partial<Product> | null>(null);
 
   const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usersRes, dealsRes] = await Promise.all([
+      const [usersRes, dealsRes, productsRes] = await Promise.all([
         fetch(`${url}/users?admin_id=${loggedInUser?.id}`),
-        fetch(`${url}/deals`)
+        fetch(`${url}/deals`),
+        fetch(`${url}/products`)
       ]);
       const usersData = await usersRes.json();
       const dealsData = await dealsRes.json();
+      const productsData = await productsRes.json();
       
       if (usersRes.ok) setUsers(usersData);
       if (dealsRes.ok) setDeals(dealsData);
+      if (productsRes.ok) setProducts(productsData);
     } catch (err) {
       console.error(err);
     }
@@ -103,6 +116,44 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser }) => {
       });
       if(res.ok) fetchData();
       else alert('Erro ao excluir promoção');
+    } catch(err) {
+      alert('Erro de conexão');
+    }
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct?.name) return alert('Nome é obrigatório');
+    
+    const isNew = !('id' in editingProduct) || !editingProduct.id;
+    const method = isNew ? 'POST' : 'PUT';
+    const endpoint = isNew ? `${url}/products` : `${url}/products/${editingProduct.id}`;
+
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editingProduct.name, category: editingProduct.category })
+      });
+      if (res.ok) {
+        setEditingProduct(null);
+        fetchData();
+      } else {
+        alert('Erro ao salvar produto');
+      }
+    } catch(err) {
+      alert('Erro de conexão');
+    }
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    if(!window.confirm('Excluir este produto? O histórico de preços atrelado também será apagado. Tem certeza?')) return;
+    try {
+      const res = await fetch(`${url}/products/${id}`, {
+        method: 'DELETE'
+      });
+      if(res.ok) fetchData();
+      else alert('Erro ao excluir produto');
     } catch(err) {
       alert('Erro de conexão');
     }
@@ -175,6 +226,53 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser }) => {
     </div>
   );
 
+  const renderProducts = () => (
+    <div>
+      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3>Gerenciar Produtos e Fichas Técnicas</h3>
+        <button className="button" onClick={() => setEditingProduct({ name: '', category: 'Outros' })}>+ Novo Produto</button>
+      </div>
+
+      {editingProduct && (
+        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '16px', border: '1px solid #e2e8f0' }}>
+          <h4>{editingProduct.id ? 'Editar Produto' : 'Cadastrar Produto'}</h4>
+          <form onSubmit={handleSaveProduct} style={{ display: 'flex', gap: '8px', marginTop: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+             <input type="text" placeholder="Nome do Produto (ex: RTX 4060)" value={editingProduct.name || ''} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} style={{ flex: 2, minWidth: '200px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} required />
+             <input type="text" placeholder="Categoria (ex: Placa de Vídeo)" value={editingProduct.category || ''} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} style={{ flex: 1, minWidth: '150px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} required />
+             <button type="submit" className="button">Salvar</button>
+             <button type="button" className="button secondary" onClick={() => setEditingProduct(null)}>Cancelar</button>
+          </form>
+        </div>
+      )}
+
+      <div style={{ overflowX: 'auto' }}>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome da Base</th>
+              <th>Categoria</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map(p => (
+              <tr key={p.id}>
+                <td>{p.id}</td>
+                <td>{p.name}</td>
+                <td>{p.category}</td>
+                <td style={{ display: 'flex', gap: '8px' }}>
+                  <button className="button secondary admin-btn" onClick={() => setEditingProduct(p)}>Editar</button>
+                  <button className="button admin-btn delete" onClick={() => handleDeleteProduct(p.id)}>Excluir</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   return (
     <div className="admin-page">
       <div className="admin-header">
@@ -182,12 +280,15 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUser }) => {
         <div className="admin-tabs">
           <button className={`admin-tab ${activeTab==='users'?'active':''}`} onClick={()=>setActiveTab('users')}>Usuários ({users.length})</button>
           <button className={`admin-tab ${activeTab==='deals'?'active':''}`} onClick={()=>setActiveTab('deals')}>Promoções ({deals.length})</button>
+          <button className={`admin-tab ${activeTab==='products'?'active':''}`} onClick={()=>setActiveTab('products')}>Produtos ({products.length})</button>
         </div>
       </div>
       
       <div className="admin-content">
         {loading ? <p>Carregando dados...</p> : (
-          activeTab === 'users' ? renderUsers() : renderDeals()
+          activeTab === 'users' ? renderUsers() : 
+          activeTab === 'deals' ? renderDeals() : 
+          renderProducts()
         )}
       </div>
     </div>
