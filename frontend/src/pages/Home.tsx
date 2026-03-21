@@ -101,7 +101,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
             <p>Nenhuma promoção encontrada.</p>
           ) : (
             filteredDeals.map(deal => (
-              <div key={deal.id} onClick={() => navigate(`/deal/${deal.id}`)} style={{ cursor: 'pointer' }}>
+              <div key={deal.id}>
                 <DealCard
                   id={deal.id}
                   title={deal.title}
