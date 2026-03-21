@@ -32,7 +32,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
   const navigate = useNavigate();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'quentes' | 'recentes' | 'comentados'>('quentes');
+  const [filter, setFilter] = useState<'avaliados' | 'recentes'>('recentes');
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -64,13 +64,10 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
   }
 
   // Apply sorting filter
-  if (filter === 'quentes') {
+  if (filter === 'avaliados') {
     filteredDeals.sort((a, b) => (b.likes_count - b.dislikes_count) - (a.likes_count - a.dislikes_count));
   } else if (filter === 'recentes') {
     filteredDeals.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  } else if (filter === 'comentados') {
-    // We don't have comments count in the deal payload yet, so fallback to random or temperature
-    filteredDeals.sort((a, b) => b.id - a.id); // fallback mock for comments sort
   }
 
   return (
@@ -79,17 +76,13 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category }) => {
         <h2>{searchQuery ? `Resultados para "${searchQuery}"` : category}</h2>
         <div className="filters">
           <button 
-            className={`filter-btn ${filter === 'quentes' ? 'active' : ''}`}
-            onClick={() => setFilter('quentes')}
-          >Quentes</button>
-          <button 
             className={`filter-btn ${filter === 'recentes' ? 'active' : ''}`}
             onClick={() => setFilter('recentes')}
-          >Recentes</button>
+          >Organizar por data: Mais recentes primeiro</button>
           <button 
-            className={`filter-btn ${filter === 'comentados' ? 'active' : ''}`}
-            onClick={() => setFilter('comentados')}
-          >Comentados</button>
+            className={`filter-btn ${filter === 'avaliados' ? 'active' : ''}`}
+            onClick={() => setFilter('avaliados')}
+          >Organizar por avaliação: Os melhores avaliados (likes - dislikes) primeiro</button>
         </div>
       </header>
 
