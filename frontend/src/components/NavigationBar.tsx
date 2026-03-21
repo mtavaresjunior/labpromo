@@ -191,10 +191,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
           </li>
           <li className="category-menu-container" style={{ position: 'relative' }}>
             <a 
-              className={currentCategory && currentCategory !== 'Todas' ? 'active' : ''} 
               style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
             >
-              Hardware / Componentes ▾
+              Componentes ▾
             </a>
             <div className="category-dropdown-wrapper">
               <div className="category-dropdown">
@@ -215,7 +214,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
           </li>
           <li className="category-menu-container" style={{ position: 'relative' }}>
             <a 
-              className={currentStore && currentStore !== 'Todas' ? 'active' : ''} 
               style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
             >
               Lojas ▾
