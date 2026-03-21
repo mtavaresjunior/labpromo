@@ -213,10 +213,21 @@
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.35s ease-out; /* Slower and smoother transition */
   pointer-events: none;
   display: flex;
   flex-direction: column;
+}
+
+/* Invisible bridge to prevent hover loss when moving mouse down */
+.profile-dropdown::before, .category-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: transparent;
 }
 
 .profile-dropdown {
