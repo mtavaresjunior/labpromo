@@ -106,6 +106,22 @@
   gap: 20px;
 }
 
+.save-success {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+html.dark .save-success {
+  background-color: #14532d;
+  color: #86efac;
+  border-color: #16a34a;
+}
+
 .profile-empty {
   text-align: center;
   padding: 40px;

@@ -7,29 +7,29 @@ import NavigationBar from './components/NavigationBar';
 import AuthModal from './components/AuthModal';
 import CreateDealModal from './components/CreateDealModal';
 import AdminPage from './pages/AdminPage';
+import { getStoredUser, clearAuth } from './utils/auth';
 
 function App() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
-  const category = searchParams.get('category') || 'Promocoes';
-  const store = searchParams.get('store') || '';
-  
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const category    = searchParams.get('category') || 'Promocoes';
+  const store       = searchParams.get('store') || '';
+
+  const [showAuthModal, setShowAuthModal]           = useState(false);
   const [showCreateDealModal, setShowCreateDealModal] = useState(false);
-  
-  const [loggedInUser, setLoggedInUser] = useState<any>(null);
-  const [dealsRefreshKey, setDealsRefreshKey] = useState(0); 
+  const [loggedInUser, setLoggedInUser]             = useState<any>(null);
+  const [dealsRefreshKey, setDealsRefreshKey]       = useState(0);
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) setLoggedInUser(JSON.parse(user));
+    const user = getStoredUser();
+    if (user) setLoggedInUser(user);
   }, []);
 
   const handleDealCreated = () => {
-     setShowCreateDealModal(false);
-     setDealsRefreshKey(prev => prev + 1);
-     navigate('/');
+    setShowCreateDealModal(false);
+    setDealsRefreshKey(prev => prev + 1);
+    navigate('/');
   };
 
   const handleLoginSuccess = (userData: any) => {
@@ -38,14 +38,14 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    clearAuth();
     setLoggedInUser(null);
     navigate('/');
   };
 
   return (
     <div className="home-layout">
-      <NavigationBar 
+      <NavigationBar
         searchQuery={searchQuery}
         currentCategory={category}
         currentStore={store}
@@ -54,33 +54,30 @@ function App() {
         onCreateDealClick={() => setShowCreateDealModal(true)}
         onLogout={handleLogout}
       />
-      
+
       <Routes>
         <Route path="/" element={
-          <Home 
-            key={dealsRefreshKey}
-            searchQuery={searchQuery} 
-            category={category} 
-            store={store}
-          />
+          <Home key={dealsRefreshKey} searchQuery={searchQuery} category={category} store={store} />
         } />
         <Route path="/deal/:id" element={<DealPage />} />
         <Route path="/profile" element={
-          <ProfilePage initialTab="edit" onLogout={handleLogout} />
+          <ProfilePage initialTab="edit" onLogout={handleLogout} onUserUpdate={setLoggedInUser} />
         } />
         <Route path="/profile/posts" element={
-          <ProfilePage initialTab="posts" onLogout={handleLogout} />
+          <ProfilePage initialTab="posts" onLogout={handleLogout} onUserUpdate={setLoggedInUser} />
         } />
         <Route path="/profile/favorites" element={
-          <ProfilePage initialTab="favorites" onLogout={handleLogout} />
+          <ProfilePage initialTab="favorites" onLogout={handleLogout} onUserUpdate={setLoggedInUser} />
         } />
-        <Route path="/admin" element={
-          <AdminPage loggedInUser={loggedInUser} />
-        } />
+        <Route path="/admin" element={<AdminPage loggedInUser={loggedInUser} />} />
       </Routes>
-      
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onSuccess={handleLoginSuccess} />}
-      {showCreateDealModal && <CreateDealModal onClose={() => setShowCreateDealModal(false)} onCreated={handleDealCreated} />}
+
+      {showAuthModal && (
+        <AuthModal onClose={() => setShowAuthModal(false)} onSuccess={handleLoginSuccess} />
+      )}
+      {showCreateDealModal && (
+        <CreateDealModal onClose={() => setShowCreateDealModal(false)} onCreated={handleDealCreated} />
+      )}
     </div>
   );
 }

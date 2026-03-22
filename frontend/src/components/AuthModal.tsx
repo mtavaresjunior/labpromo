@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { setAuth } from '../utils/auth';
 import './Modal.css';
 
 interface AuthModalProps {
@@ -8,11 +9,11 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
+  const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading]  = useState(false);
+  const [error, setError]      = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,21 +21,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
     setError('');
 
     try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
+      const url      = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const endpoint = isLogin ? '/users/login' : '/users/register';
-      const payload = isLogin ? { email, password } : { email, password, username };
+      const payload  = isLogin
+        ? { email, password }
+        : { email, password, username };
 
-      const res = await fetch(`${url}${endpoint}`, {
-        method: 'POST',
+      const res  = await fetch(`${url}${endpoint}`, {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body:    JSON.stringify(payload),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro na autenticação');
-      
-      localStorage.setItem('user', JSON.stringify(data));
-      onSuccess(data);
+
+      // Servidor retorna { token, user }
+      setAuth(data.token, data.user);
+      onSuccess(data.user);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -47,24 +51,44 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>&times;</button>
         <h2>{isLogin ? 'Entrar' : 'Criar Conta'}</h2>
-        
+
         {error && <div className="modal-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
             <label>E-mail</label>
-            <input type="email" required value={email} onChange={e => setEmail(e.target.value)} />
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
           </div>
-          
+
           <div className="form-group">
             <label>Senha</label>
-            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} />
+            <input
+              type="password"
+              required
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+              minLength={6}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
           </div>
 
           {!isLogin && (
             <div className="form-group">
               <label>Nome de usuário</label>
-              <input type="text" required value={username} onChange={e => setUsername(e.target.value)} />
+              <input
+                type="text"
+                required
+                minLength={3}
+                maxLength={50}
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+              />
             </div>
           )}
 
@@ -73,7 +97,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
           </button>
         </form>
 
-        <p className="modal-toggle" onClick={() => setIsLogin(!isLogin)}>
+        <p className="modal-toggle" onClick={() => { setIsLogin(!isLogin); setError(''); }}>
           {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
         </p>
       </div>

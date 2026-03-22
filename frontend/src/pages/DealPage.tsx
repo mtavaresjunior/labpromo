@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import CreateDealModal from '../components/CreateDealModal';
 import { formatTimeAgo } from '../utils/formatTime';
+import { getStoredUser, jsonAuthHeaders, authHeaders } from '../utils/auth';
 import './DealPage.css';
 
 interface Deal {
@@ -52,8 +53,8 @@ const DealPage: React.FC = () => {
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
 
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
-    if (userStr) setLoggedInUser(JSON.parse(userStr));
+    const user = getStoredUser();
+    if (user) setLoggedInUser(user);
   }, []);
 
   useEffect(() => {
@@ -61,9 +62,9 @@ const DealPage: React.FC = () => {
     const checkFav = async () => {
       try {
         const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
-        const res = await fetch(`${url}/users/${loggedInUser.id}/favorites`);
+        const res = await fetch(`${url}/users/${loggedInUser.id}/favorites`, { headers: authHeaders() });
         const favs = await res.json();
-        setIsFavorite(favs.some((f: any) => f.id === deal.id));
+        setIsFavorite(Array.isArray(favs) && favs.some((f: any) => f.id === deal.id));
       } catch (err) {}
     }
     checkFav();
@@ -74,13 +75,13 @@ const DealPage: React.FC = () => {
     try {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       if (isFavorite) {
-         await fetch(`${url}/deals/${deal.id}/favorite/${loggedInUser.id}`, { method: 'DELETE' });
+         await fetch(`${url}/deals/${deal.id}/favorite`, { method: 'DELETE', headers: authHeaders() });
          setIsFavorite(false);
       } else {
          await fetch(`${url}/deals/${deal.id}/favorite`, {
            method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ user_id: loggedInUser.id })
+           headers: jsonAuthHeaders(),
+           body: JSON.stringify({}),
          });
          setIsFavorite(true);
       }
@@ -97,8 +98,8 @@ const DealPage: React.FC = () => {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/comments/deal/${dealId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: loggedInUser.id, content: newComment })
+        headers: jsonAuthHeaders(),
+        body: JSON.stringify({ content: newComment }),
       });
       if (res.ok) {
         const commentData = await res.json();
@@ -124,8 +125,8 @@ const DealPage: React.FC = () => {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/comments/deal/${dealId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: loggedInUser.id, content: replyContent, parent_id: parentId })
+        headers: jsonAuthHeaders(),
+        body: JSON.stringify({ content: replyContent, parent_id: parentId }),
       });
       if (res.ok) {
         const commentData = await res.json();
@@ -148,8 +149,7 @@ const DealPage: React.FC = () => {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/deals/${dealId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: loggedInUser.id })
+        headers: jsonAuthHeaders(),
       });
       
       if (res.ok) {
@@ -172,8 +172,7 @@ const DealPage: React.FC = () => {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/comments/${commentId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: loggedInUser.id })
+        headers: jsonAuthHeaders(),
       });
       if (res.ok) {
         setComments(comments.filter(c => c.id !== commentId));
@@ -223,18 +222,18 @@ const DealPage: React.FC = () => {
         setComments(commentsData);
 
         if (loggedInUser) {
-           const userVotesRes = await fetch(`${url}/deals/user-votes/${loggedInUser.id}`);
+           const userVotesRes = await fetch(`${url}/deals/user-votes/${loggedInUser.id}`, { headers: authHeaders() });
            if (userVotesRes.ok) {
              const userVotes = await userVotesRes.json();
-             const dealVote = userVotes.find((v:any) => v.deal_id === dealId);
+             const dealVote = userVotes.find((v: any) => v.deal_id === dealId);
              if (dealVote) setUserDealVote(dealVote.vote_type);
            }
 
-           const commentVotesRes = await fetch(`${url}/comments/user-votes/${loggedInUser.id}`);
+           const commentVotesRes = await fetch(`${url}/comments/user-votes/${loggedInUser.id}`, { headers: authHeaders() });
            if (commentVotesRes.ok) {
              const commentVotes = await commentVotesRes.json();
              const cvMap: Record<number, 1 | -1> = {};
-             commentVotes.forEach((v:any) => cvMap[v.comment_id] = v.vote_type);
+             commentVotes.forEach((v: any) => { cvMap[v.comment_id] = v.vote_type; });
              setUserCommentVotes(cvMap);
            }
         }
@@ -254,8 +253,8 @@ const DealPage: React.FC = () => {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/deals/${dealId}/vote`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: loggedInUser.id, vote })
+        headers: jsonAuthHeaders(),
+        body: JSON.stringify({ vote }),
       });
       if (res.ok) {
         const updatedDeal = await res.json();
@@ -274,8 +273,8 @@ const DealPage: React.FC = () => {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const res = await fetch(`${url}/comments/${commentId}/vote`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: loggedInUser.id, vote })
+        headers: jsonAuthHeaders(),
+        body: JSON.stringify({ vote }),
       });
       if (res.ok) {
         const updatedComment = await res.json();

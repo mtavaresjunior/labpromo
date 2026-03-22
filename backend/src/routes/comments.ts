@@ -1,113 +1,167 @@
 import express, { Request, Response } from 'express';
 import { pool } from '../index';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
 
-// Get comments for a deal
+function parseId(value: string): number | null {
+  const id = parseInt(value, 10);
+  return isNaN(id) || id <= 0 ? null : id;
+}
+
+// ─── BUSCAR COMENTÁRIOS DE UM DEAL (público) ──────────────────────────────────
 router.get('/deal/:dealId', async (req: Request, res: Response) => {
-  const { dealId } = req.params;
+  const dealId = parseId(req.params.dealId);
+  if (!dealId) {
+    res.status(400).json({ error: 'ID inválido' });
+    return;
+  }
   try {
     const result = await pool.query(
-      'SELECT comments.*, users.username FROM comments JOIN users ON comments.user_id = users.id WHERE deal_id = $1 ORDER BY created_at ASC',
+      `SELECT comments.*, users.username
+       FROM comments
+       JOIN users ON comments.user_id = users.id
+       WHERE deal_id = $1
+       ORDER BY created_at ASC`,
       [dealId]
     );
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch comments' });
+    console.error('[GET COMMENTS]', err);
+    res.status(500).json({ error: 'Erro ao buscar comentários' });
   }
 });
 
-// Create a comment
-router.post('/deal/:dealId', async (req: Request, res: Response) => {
-  const { dealId } = req.params;
-  const { content, user_id, parent_id } = req.body;
+// ─── CRIAR COMENTÁRIO (autenticado) ──────────────────────────────────────────
+router.post('/deal/:dealId', authenticate, async (req: AuthRequest, res: Response) => {
+  const dealId = parseId(req.params.dealId);
+  if (!dealId) {
+    res.status(400).json({ error: 'ID inválido' });
+    return;
+  }
+
+  const { content, parent_id } = req.body;
+  if (!content?.trim() || content.trim().length > 2000) {
+    res.status(400).json({ error: 'Comentário deve ter entre 1 e 2000 caracteres' });
+    return;
+  }
+
+  const userId = req.user!.id;
+  const parsedParentId = parent_id ? parseId(String(parent_id)) : null;
+
   try {
     const result = await pool.query(
-      'INSERT INTO comments (deal_id, user_id, content, likes_count, dislikes_count, parent_id) VALUES ($1, $2, $3, 0, 0, $4) RETURNING *',
-      [dealId, user_id, content, parent_id || null]
+      `INSERT INTO comments (deal_id, user_id, content, likes_count, dislikes_count, parent_id)
+       VALUES ($1, $2, $3, 0, 0, $4)
+       RETURNING *`,
+      [dealId, userId, content.trim(), parsedParentId]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to create comment' });
+    console.error('[CREATE COMMENT]', err);
+    res.status(500).json({ error: 'Erro ao criar comentário' });
   }
 });
 
-// Delete a comment
-router.delete('/:id', async (req: Request, res: Response) => {
-  const commentId = req.params.id;
-  const { user_id } = req.body;
-  
+// ─── EXCLUIR COMENTÁRIO (autenticado, dono ou admin) ─────────────────────────
+router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
+  const commentId = parseId(req.params.id);
+  if (!commentId) {
+    res.status(400).json({ error: 'ID inválido' });
+    return;
+  }
+
   try {
     const commentRes = await pool.query('SELECT user_id FROM comments WHERE id = $1', [commentId]);
-    if (commentRes.rows.length === 0) return res.status(404).json({ error: 'Comment not found' });
-    
-    if (!user_id) return res.status(401).json({ error: 'User ID required' });
+    if (commentRes.rows.length === 0) {
+      res.status(404).json({ error: 'Comentário não encontrado' });
+      return;
+    }
 
-    const userRes = await pool.query('SELECT is_admin FROM users WHERE id = $1', [user_id]);
-    const isAdmin = userRes.rows[0]?.is_admin;
-    
-    if (commentRes.rows[0].user_id !== Number(user_id) && !isAdmin) {
-      return res.status(403).json({ error: 'Not authorized to delete this comment' });
+    const isOwner = commentRes.rows[0].user_id === req.user!.id;
+    if (!isOwner && !req.user!.is_admin) {
+      res.status(403).json({ error: 'Sem permissão para excluir este comentário' });
+      return;
     }
 
     await pool.query('DELETE FROM comments WHERE id = $1', [commentId]);
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to delete comment' });
+    console.error('[DELETE COMMENT]', err);
+    res.status(500).json({ error: 'Erro ao excluir comentário' });
   }
 });
 
-// Endpoint to upvote/downvote comment
-router.post('/:id/vote', async (req: Request, res: Response) => {
-  const commentId = req.params.id;
-  const { user_id, vote } = req.body; 
+// ─── VOTAR EM COMENTÁRIO (autenticado) ───────────────────────────────────────
+router.post('/:id/vote', authenticate, async (req: AuthRequest, res: Response) => {
+  const commentId = parseId(req.params.id);
+  if (!commentId) {
+    res.status(400).json({ error: 'ID inválido' });
+    return;
+  }
 
-  if (!user_id) return res.status(401).json({ error: 'User ID required to vote' });
-  
+  const { vote } = req.body;
+  if (vote !== 'up' && vote !== 'down') {
+    res.status(400).json({ error: 'Voto inválido. Use "up" ou "down"' });
+    return;
+  }
+
+  const userId = req.user!.id;
+  const voteType = vote === 'up' ? 1 : -1;
+
   try {
-    const voteType = vote === 'up' ? 1 : -1;
-    const existingVoteRes = await pool.query('SELECT vote_type FROM comment_votes WHERE user_id = $1 AND comment_id = $2', [user_id, commentId]);
-    
+    const existingVoteRes = await pool.query(
+      'SELECT vote_type FROM comment_votes WHERE user_id = $1 AND comment_id = $2',
+      [userId, commentId]
+    );
+
     if (existingVoteRes.rows.length > 0) {
-      const existingVote = existingVoteRes.rows[0].vote_type;
-      if (existingVote === voteType) {
-        // remove
-        await pool.query('DELETE FROM comment_votes WHERE user_id = $1 AND comment_id = $2', [user_id, commentId]);
+      const existing = existingVoteRes.rows[0].vote_type;
+      if (existing === voteType) {
+        await pool.query('DELETE FROM comment_votes WHERE user_id = $1 AND comment_id = $2', [userId, commentId]);
         if (voteType === 1) await pool.query('UPDATE comments SET likes_count = likes_count - 1 WHERE id = $1', [commentId]);
         else await pool.query('UPDATE comments SET dislikes_count = dislikes_count - 1 WHERE id = $1', [commentId]);
       } else {
-        // switch
-        await pool.query('UPDATE comment_votes SET vote_type = $1 WHERE user_id = $2 AND comment_id = $3', [voteType, user_id, commentId]);
+        await pool.query('UPDATE comment_votes SET vote_type = $1 WHERE user_id = $2 AND comment_id = $3', [voteType, userId, commentId]);
         if (voteType === 1) await pool.query('UPDATE comments SET likes_count = likes_count + 1, dislikes_count = dislikes_count - 1 WHERE id = $1', [commentId]);
         else await pool.query('UPDATE comments SET dislikes_count = dislikes_count + 1, likes_count = likes_count - 1 WHERE id = $1', [commentId]);
       }
     } else {
-      // new
-      await pool.query('INSERT INTO comment_votes (user_id, comment_id, vote_type) VALUES ($1, $2, $3)', [user_id, commentId, voteType]);
+      await pool.query('INSERT INTO comment_votes (user_id, comment_id, vote_type) VALUES ($1, $2, $3)', [userId, commentId, voteType]);
       if (voteType === 1) await pool.query('UPDATE comments SET likes_count = likes_count + 1 WHERE id = $1', [commentId]);
       else await pool.query('UPDATE comments SET dislikes_count = dislikes_count + 1 WHERE id = $1', [commentId]);
     }
-    
+
     const result = await pool.query('SELECT * FROM comments WHERE id = $1', [commentId]);
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to vote on comment' });
+    console.error('[VOTE COMMENT]', err);
+    res.status(500).json({ error: 'Erro ao votar no comentário' });
   }
 });
 
-// Endpoint to get user comment votes
-router.get('/user-votes/:userId', async (req: Request, res: Response) => {
-  const userId = req.params.userId;
+// ─── VOTOS DE COMENTÁRIO DO USUÁRIO (autenticado, próprio usuário) ────────────
+router.get('/user-votes/:userId', authenticate, async (req: AuthRequest, res: Response) => {
+  const targetId = parseId(req.params.userId);
+  if (!targetId) {
+    res.status(400).json({ error: 'ID inválido' });
+    return;
+  }
+
+  if (req.user!.id !== targetId) {
+    res.status(403).json({ error: 'Sem permissão para ver votos de outro usuário' });
+    return;
+  }
+
   try {
-    const result = await pool.query('SELECT comment_id, vote_type FROM comment_votes WHERE user_id = $1', [userId]);
+    const result = await pool.query(
+      'SELECT comment_id, vote_type FROM comment_votes WHERE user_id = $1',
+      [targetId]
+    );
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch user comment votes' });
+    console.error('[USER COMMENT VOTES]', err);
+    res.status(500).json({ error: 'Erro ao buscar votos de comentários' });
   }
 });
 

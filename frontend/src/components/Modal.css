@@ -157,6 +157,41 @@ html.dark .form-group select:focus {
   color: var(--primary-hover);
 }
 
+/* Dropdown de sugestões de produtos */
+.product-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 2px 0 0;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.product-suggestions li {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--transition-fast);
+}
+
+.product-suggestions li:last-child {
+  border-bottom: none;
+}
+
+.product-suggestions li:hover {
+  background-color: var(--secondary);
+}
+
 @media (max-width: 600px) {
   .modal-content {
     padding: 24px 18px;

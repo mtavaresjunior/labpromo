@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getStoredUser, jsonAuthHeaders, authHeaders } from '../utils/auth';
 import './Modal.css';
 
 interface CreateDealModalProps {
@@ -8,36 +9,37 @@ interface CreateDealModalProps {
   initialData?: any;
 }
 
+const STORES = ['KaBuM!', 'Terabyte', 'Pichau', 'Amazon', 'Mercado Livre', 'AliExpress', 'Fast Shop', 'Magazine Luiza', 'Shopee', 'Outras'];
+const CATEGORIES = ['Placa-mãe', 'Processador', 'Memória RAM', 'Armazenamento', 'Placa de Vídeo', 'Fonte', 'Gabinete', 'Periféricos', 'Monitor', 'Outros'];
+
 const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, initialData }) => {
-  const navigate = useNavigate();
+  const navigate   = useNavigate();
+  const user       = getStoredUser();
+  const isAdmin    = user?.is_admin === true; // is_admin vem do servidor via JWT
+
   const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    price: initialData?.price || '',
+    title:          initialData?.title          || '',
+    price:          initialData?.price          || '',
     original_price: initialData?.original_price || '',
-    image_url: initialData?.image_url || '',
-    store_name: initialData?.store_name || 'Outras',
-    category: initialData?.category || 'Outros',
-    description: initialData?.description || '',
-    link: initialData?.link || ''
+    image_url:      initialData?.image_url      || '',
+    store_name:     initialData?.store_name     || 'Outras',
+    category:       initialData?.category       || 'Outros',
+    description:    initialData?.description    || '',
+    link:           initialData?.link           || '',
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  const isAdmin = user?.role === 'admin';
-
-  const [productQuery, setProductQuery] = useState('');
+  const [loading, setLoading]                       = useState(false);
+  const [error, setError]                           = useState('');
+  const [productQuery, setProductQuery]             = useState('');
   const [productSuggestions, setProductSuggestions] = useState<any[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct]       = useState<any>(null);
 
   React.useEffect(() => {
     if (productQuery.length > 2 && !selectedProduct) {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       fetch(`${url}/products/search?q=${encodeURIComponent(productQuery)}`)
         .then(res => res.json())
-        .then(data => setProductSuggestions(data))
-        .catch(err => console.error(err));
+        .then(data => setProductSuggestions(Array.isArray(data) ? data : []))
+        .catch(() => setProductSuggestions([]));
     } else {
       setProductSuggestions([]);
     }
@@ -52,42 +54,44 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
     setLoading(true);
     setError('');
 
-    try {
-      const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
-      
-      if (!user) throw new Error('Você precisa estar logado para enviar uma promoção!');
+    if (!user) {
+      setError('Você precisa estar logado para enviar uma promoção');
+      setLoading(false);
+      return;
+    }
 
+    try {
+      const url    = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       const method = initialData ? 'PUT' : 'POST';
       const endpoint = initialData ? `${url}/deals/${initialData.id}` : `${url}/deals`;
 
-      let finalProductId = selectedProduct?.id || initialData?.product_id;
-      
-      if (!selectedProduct && productQuery.trim() !== '') {
-        if (!isAdmin) {
-          throw new Error('Apenas administradores podem criar novos produtos. Selecione um produto da lista ou deixe o campo em branco.');
-        }
+      let finalProductId = selectedProduct?.id || initialData?.product_id || null;
+
+      // Apenas admin pode criar um produto novo digitando o nome
+      if (!selectedProduct && productQuery.trim() !== '' && isAdmin) {
         const prodRes = await fetch(`${url}/products`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: productQuery.trim(), category: formData.category })
+          method:  'POST',
+          headers: jsonAuthHeaders(),
+          body:    JSON.stringify({ name: productQuery.trim(), category: formData.category }),
         });
-        const newProd = await prodRes.json();
-        if (prodRes.ok) finalProductId = newProd.id;
+        if (prodRes.ok) {
+          const newProd = await prodRes.json();
+          finalProductId = newProd.id;
+        }
       }
 
       const res = await fetch(endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, posted_by: user.id, user_id: user.id, product_id: finalProductId })
+        headers: jsonAuthHeaders(),
+        // Não envia posted_by/user_id — o servidor extrai do JWT
+        body: JSON.stringify({ ...formData, product_id: finalProductId }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro ao criar promoção');
-      
+      if (!res.ok) throw new Error(data.error || 'Erro ao salvar promoção');
+
       onCreated();
-      if (!initialData) {
-        navigate(`/deal/${data.id}`);
-      }
+      if (!initialData) navigate(`/deal/${data.id}`);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -100,23 +104,28 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
       <div className="modal-content wide" onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>&times;</button>
         <h2>{initialData ? 'Editar Promoção' : 'Enviar nova promoção'}</h2>
-        
+
         {error && <div className="modal-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="modal-form grid">
+
+          {/* Produto associado */}
           <div className="form-group full" style={{ position: 'relative' }}>
-            <label>Produto Associado ({isAdmin ? 'Busque ou digite para criar novo' : 'Busque um produto existente'}) - Opcional</label>
-            <input 
-              type="text" 
-              placeholder="Ex: RTX 4060 Asus" 
-              value={productQuery} 
-              onChange={(e) => { setProductQuery(e.target.value); setSelectedProduct(null); }} 
+            <label>
+              Produto Associado
+              {isAdmin ? ' (busque ou digite para criar novo)' : ' (busque um produto existente)'} — Opcional
+            </label>
+            <input
+              type="text"
+              placeholder="Ex: RTX 4060 Asus"
+              value={productQuery}
+              onChange={e => { setProductQuery(e.target.value); setSelectedProduct(null); }}
               autoComplete="off"
             />
             {productSuggestions.length > 0 && (
-              <ul style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid #ccc', zIndex: 10, listStyle: 'none', padding: 0, margin: 0, maxHeight: 150, overflowY: 'auto' }}>
+              <ul className="product-suggestions">
                 {productSuggestions.map(p => (
-                  <li key={p.id} style={{ padding: '8px', cursor: 'pointer', borderBottom: '1px solid #eee' }} onClick={() => { setSelectedProduct(p); setProductQuery(p.name); }}>
+                  <li key={p.id} onClick={() => { setSelectedProduct(p); setProductQuery(p.name); setProductSuggestions([]); }}>
                     {p.name}
                   </li>
                 ))}
@@ -126,52 +135,34 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
 
           <div className="form-group full">
             <label>Título da Promoção</label>
-            <input name="title" required value={formData.title} onChange={handleChange} />
+            <input name="title" required maxLength={200} value={formData.title} onChange={handleChange} />
           </div>
-          
+
           <div className="form-group">
             <label>Preço atual (R$)</label>
-            <input type="number" step="0.01" name="price" required value={formData.price} onChange={handleChange} />
+            <input type="number" step="0.01" min="0" name="price" required value={formData.price} onChange={handleChange} />
           </div>
 
           <div className="form-group">
-            <label>Preço original (R$) - Opcional</label>
-            <input type="number" step="0.01" name="original_price" value={formData.original_price} onChange={handleChange} />
+            <label>Preço original (R$) — Opcional</label>
+            <input type="number" step="0.01" min="0" name="original_price" value={formData.original_price} onChange={handleChange} />
           </div>
 
-          <div className="form-group border-right">
+          <div className="form-group">
             <label>Nome da Loja</label>
-            <select name="store_name" required value={formData.store_name} onChange={handleChange} style={{ width: '100%', padding: '0.8rem', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }}>
-              <option value="KaBuM!">KaBuM!</option>
-              <option value="Terabyte">Terabyte</option>
-              <option value="Pichau">Pichau</option>
-              <option value="Amazon">Amazon</option>
-              <option value="Mercado Livre">Mercado Livre</option>
-              <option value="AliExpress">AliExpress</option>
-              <option value="Fast Shop">Fast Shop</option>
-              <option value="Magazine Luiza">Magazine Luiza</option>
-              <option value="Shopee">Shopee</option>
-              <option value="Outras">Outras</option>
+            <select name="store_name" required value={formData.store_name} onChange={handleChange}>
+              {STORES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
 
           <div className="form-group">
             <label>Categoria</label>
-            <select name="category" required value={formData.category} onChange={handleChange} style={{ width: '100%', padding: '0.8rem', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' }}>
-              <option value="Placa-mãe">Placa-mãe</option>
-              <option value="Processador">Processador</option>
-              <option value="Memória RAM">Memória RAM</option>
-              <option value="Armazenamento">Armazenamento (HD/SSD)</option>
-              <option value="Placa de Vídeo">Placa de Vídeo</option>
-              <option value="Fonte">Fonte de Alimentação</option>
-              <option value="Gabinete">Gabinete</option>
-              <option value="Periféricos">Periféricos</option>
-              <option value="Monitor">Monitor</option>
-              <option value="Outros">Outros</option>
+            <select name="category" required value={formData.category} onChange={handleChange}>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-          
-          <div className="form-group border-right">
+
+          <div className="form-group">
             <label>Link do Produto</label>
             <input name="link" type="url" required value={formData.link} onChange={handleChange} />
           </div>
@@ -183,7 +174,7 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
 
           <div className="form-group full">
             <label>Descrição</label>
-            <textarea name="description" rows={4} required value={formData.description} onChange={handleChange}></textarea>
+            <textarea name="description" rows={4} required maxLength={5000} value={formData.description} onChange={handleChange} />
           </div>
 
           <div className="form-group full">
