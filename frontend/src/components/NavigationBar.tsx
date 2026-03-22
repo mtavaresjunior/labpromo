@@ -54,6 +54,16 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
   const [deals, setDeals] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
+  const toggleTheme = () => {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.theme = 'light';
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.theme = 'dark';
+    }
+  };
+
   useEffect(() => {
     const fetchDeals = async () => {
       try {
@@ -108,8 +118,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     <nav className="navbar">
       <div className="navbar-top">
         <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <img src="/hardpromo-logo.png" alt="HardPromo Oficial" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
-          <a href="#" onClick={(e) => { e.preventDefault(); }} style={{ fontWeight: 'bold', fontSize: '1.25rem', paddingLeft: '4px' }}>HardPromo</a>
+          <img src="/garimpotech-logo.png" alt="GarimpoTech Oficial" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
+          <a href="#" onClick={(e) => { e.preventDefault(); }} style={{ fontWeight: 'bold', fontSize: '1.25rem', paddingLeft: '4px' }}>GarimpoTech.net</a>
         </div>
         
         <form className="navbar-search" onSubmit={handleSearchSubmit} style={{ position: 'relative' }}>
@@ -145,7 +155,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
           )}
         </form>
 
-        <div className="navbar-actions">
+        <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button onClick={toggleTheme} style={{ background: 'transparent', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: 'white' }} title="Alternar Tema">🌓</button>
           {loggedInUser ? (
             <>
               <button className="button" onClick={onCreateDealClick}>Enviar promoção</button>

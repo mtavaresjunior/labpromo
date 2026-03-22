@@ -1,12 +1,12 @@
 :root {
-  --primary: #f97316;
-  --primary-hover: #ea580c;
-  --secondary: #1f2937;
-  --background: #111827;
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --surface: #1f2937;
-  --border: #374151;
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --secondary: #e5e7eb;
+  --background: #ffffff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --surface: #f9fafb;
+  --border: #e5e7eb;
   --hot: #ef4444;
   --cold: #3b82f6;
   
@@ -22,6 +22,22 @@
   
   --transition-fast: 0.15s ease-in-out;
   --transition-med: 0.25s ease-in-out;
+}
+
+html.dark {
+  --primary: #10b981;
+  --primary-hover: #34d399;
+  --secondary: #1f2937;
+  --background: #000000;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --surface: #111827;
+  --border: #374151;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-hover: 0 14px 28px -6px rgb(0 0 0 / 0.8);
 }
 
 * {
