@@ -1,12 +1,12 @@
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --secondary: #e0e7ff;
-  --background: #f8fafc;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --surface: #ffffff;
-  --border: #e2e8f0;
+  --primary: #f97316;
+  --primary-hover: #ea580c;
+  --secondary: #1f2937;
+  --background: #111827;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --surface: #1f2937;
+  --border: #374151;
   --hot: #ef4444;
   --cold: #3b82f6;
   

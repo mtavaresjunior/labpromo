@@ -108,8 +108,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     <nav className="navbar">
       <div className="navbar-top">
         <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <img src="/mascote.png?v=2" alt="Mascote Menino de TI Promos" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
-          <a href="#" onClick={(e) => { e.preventDefault(); }}>Menino de TI Promos</a>
+          <img src="/hardpromo-logo.png" alt="HardPromo Oficial" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
+          <a href="#" onClick={(e) => { e.preventDefault(); }} style={{ fontWeight: 'bold', fontSize: '1.25rem', paddingLeft: '4px' }}>HardPromo</a>
         </div>
         
         <form className="navbar-search" onSubmit={handleSearchSubmit} style={{ position: 'relative' }}>

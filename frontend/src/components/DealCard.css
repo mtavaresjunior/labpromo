@@ -12,7 +12,7 @@
 .deal-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
-  border-color: #cbd5e1;
+  border-color: var(--primary);
 }
 
 .deal-image {
