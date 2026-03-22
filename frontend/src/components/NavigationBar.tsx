@@ -117,9 +117,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
   return (
     <nav className="navbar">
       <div className="navbar-top">
-        <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <img src="/garimpotech-logo.png" alt="GarimpoTech Oficial" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
-          <a href="#" onClick={(e) => { e.preventDefault(); }} style={{ fontWeight: 'bold', fontSize: '1.25rem', paddingLeft: '4px' }}>GarimpoTech.net</a>
+        <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'inherit' }} onClick={() => navigate('/')}>
+          <img src="/garimpotech-logo2.png" alt="GarimpoTech Oficial" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
+          <a href="#" onClick={(e) => { e.preventDefault(); }} style={{ fontWeight: 'bold', fontSize: '1.25rem', paddingLeft: '4px', color: 'inherit' }}>GarimpoTech.net</a>
         </div>
         
         <form className="navbar-search" onSubmit={handleSearchSubmit} style={{ position: 'relative' }}>
@@ -156,7 +156,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
         </form>
 
         <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button onClick={toggleTheme} style={{ background: 'transparent', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: 'white' }} title="Alternar Tema">🌓</button>
+          <button onClick={toggleTheme} style={{ background: 'transparent', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: 'var(--text-main)' }} title="Alternar Tema">🌓</button>
           {loggedInUser ? (
             <>
               <button className="button" onClick={onCreateDealClick}>Enviar promoção</button>

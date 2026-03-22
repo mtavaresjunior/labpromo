@@ -1,43 +1,43 @@
 :root {
-  --primary: #10b981;
-  --primary-hover: #059669;
-  --secondary: #e5e7eb;
-  --background: #ffffff;
-  --text-main: #111827;
-  --text-muted: #6b7280;
-  --surface: #f9fafb;
-  --border: #e5e7eb;
-  --hot: #ef4444;
-  --cold: #3b82f6;
+  --primary: #10b981; /* Vibrant Emerald */
+  --primary-hover: #059669; /* Deep Emerald */
+  --secondary: #f1f5f9; /* Slate 100 */
+  --background: #f8fafc; /* Slate 50 (off-white, not harsh white) */
+  --text-main: #0f172a; /* Slate 900 */
+  --text-muted: #64748b; /* Slate 500 */
+  --surface: #ffffff; /* Pure white for cards to pop against off-white bg */
+  --border: #e2e8f0; /* Slate 200 */
+  --hot: #ef4444; /* Clean Red */
+  --cold: #3b82f6; /* Clean Blue */
   
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px; /* Extemely rounded friendly look */
   --radius-full: 9999px;
   
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
-  --shadow-hover: 0 14px 28px -6px rgb(0 0 0 / 0.12);
+  --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.02);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --shadow-hover: 0 25px 50px -12px rgb(16 185 129 / 0.15); /* Soft green glow in light mode */
   
-  --transition-fast: 0.15s ease-in-out;
-  --transition-med: 0.25s ease-in-out;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-med: 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother bezier transitions */
 }
 
 html.dark {
-  --primary: #10b981;
-  --primary-hover: #34d399;
-  --secondary: #1f2937;
-  --background: #000000;
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --surface: #111827;
-  --border: #374151;
+  --primary: #10b981; /* Emerald */
+  --primary-hover: #34d399; /* Light Emerald */
+  --secondary: #1e293b; /* Slate 800 */
+  --background: #090c10; /* Deepest black-slate, premium dark mode */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --surface: #1e293b; /* Softer slate for cards */
+  --border: #334155;
   
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-  --shadow-hover: 0 14px 28px -6px rgb(0 0 0 / 0.8);
+  --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+  --shadow-hover: 0 25px 50px -12px rgb(16 185 129 / 0.25); /* Glowing green hover shadow */
 }
 
 * {
