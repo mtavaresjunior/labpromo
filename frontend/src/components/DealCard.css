@@ -96,6 +96,35 @@
   padding-top: 12px;
 }
 
+/* Badge de votos no card */
+.likes-dislikes-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-likes {
+  color: var(--primary);
+}
+
+.badge-dislikes {
+  color: var(--hot);
+}
+
+.time-ago {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
 .comments-count {
   font-size: 13px;
   font-weight: 500;

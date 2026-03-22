@@ -54,14 +54,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
   const [deals, setDeals] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
+  const [isDark, setIsDark] = useState(() =>
+    document.documentElement.classList.contains('dark')
+  );
+
   const toggleTheme = () => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-      localStorage.theme = 'light';
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.theme = 'dark';
-    }
+    const dark = document.documentElement.classList.toggle('dark');
+    localStorage.theme = dark ? 'dark' : 'light';
+    setIsDark(dark);
   };
 
   useEffect(() => {
@@ -156,7 +156,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
         </form>
 
         <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button onClick={toggleTheme} style={{ background: 'transparent', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: 'var(--text-main)' }} title="Alternar Tema">🌓</button>
+          <button onClick={toggleTheme} className="theme-toggle-btn" title={isDark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}>
+            {isDark ? '☀️' : '🌙'}
+          </button>
           {loggedInUser ? (
             <>
               <button className="button" onClick={onCreateDealClick}>Enviar promoção</button>
@@ -174,9 +176,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                     <button onMouseDown={() => { navigate('/profile/posts'); }}>Minhas Promoções</button>
                     <button onMouseDown={() => { navigate('/profile/favorites'); }}>Favoritos</button>
                     {loggedInUser?.is_admin && (
-                      <button onMouseDown={() => { navigate('/admin'); }} style={{ color: '#0056b3', fontWeight: 'bold' }}>Painel Admin</button>
+                      <button onMouseDown={() => { navigate('/admin'); }} className="admin-link">Painel Admin</button>
                     )}
-                    <button onMouseDown={() => { if(onLogout) onLogout(); }} style={{ color: '#d32f2f' }}>Sair</button>
+                    <button onMouseDown={() => { if(onLogout) onLogout(); }} className="danger-link">Sair</button>
                   </div>
                 </div>
               </div>
@@ -209,13 +211,10 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
             <div className="category-dropdown-wrapper">
               <div className="category-dropdown">
                 {HARDWARE_CATEGORIES.filter(c => c !== 'Todas').map(cat => (
-                  <button 
+                  <button
                     key={cat}
-                    onMouseDown={() => { handleCategoryClick(cat); }} 
-                    style={{ 
-                      color: currentCategory === cat ? '#0056b3' : '#333',
-                      fontWeight: currentCategory === cat ? '600' : 'normal'
-                    }}
+                    onMouseDown={() => { handleCategoryClick(cat); }}
+                    className={currentCategory === cat ? 'active' : ''}
                   >
                     {cat}
                   </button>
@@ -232,13 +231,10 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
             <div className="category-dropdown-wrapper">
               <div className="category-dropdown">
                 {STORES.filter(s => s !== 'Todas').map(store => (
-                  <button 
+                  <button
                     key={store}
-                    onMouseDown={() => { handleStoreClick(store); }} 
-                    style={{ 
-                      color: currentStore === store ? '#0056b3' : '#333',
-                      fontWeight: currentStore === store ? '600' : 'normal'
-                    }}
+                    onMouseDown={() => { handleStoreClick(store); }}
+                    className={currentStore === store ? 'active' : ''}
                   >
                     {store}
                   </button>

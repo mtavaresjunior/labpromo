@@ -31,7 +31,7 @@
 .deal-details-image {
   flex: 0 0 40%;
   position: relative;
-  background: white;
+  background-color: var(--surface-raised);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,7 +134,7 @@
   outline: none;
   border-color: var(--primary);
   background: var(--surface);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgb(22 163 74 / 0.15);
 }
 
 .comment-box button {
@@ -169,6 +169,261 @@
 .no-comments {
   color: var(--text-muted);
   font-style: italic;
+}
+
+/* ============================================
+   VOTAÇÃO DO DEAL (overlay na imagem)
+   ============================================ */
+.deal-votes-container {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+}
+
+.vote-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-family: inherit;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.vote-btn:hover {
+  background-color: var(--secondary);
+  color: var(--text-main);
+}
+
+.vote-btn.active-up {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.vote-btn.active-down {
+  background-color: #fef2f2;
+  color: var(--hot);
+}
+
+html.dark .vote-btn.active-down {
+  background-color: #450a0a;
+  color: #fca5a5;
+}
+
+/* ============================================
+   DESCRIÇÃO DO DEAL
+   ============================================ */
+.deal-page-description {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-main);
+  margin-bottom: 24px;
+}
+
+.deal-time-ago {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   AÇÕES DO DEAL (botões)
+   ============================================ */
+.deal-page-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.deal-page-actions .button {
+  flex: 1;
+  min-width: 120px;
+}
+
+.btn-delete {
+  background-color: var(--hot) !important;
+  border-color: var(--hot) !important;
+}
+
+.btn-delete:hover {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+/* ============================================
+   HISTÓRICO DE PREÇOS
+   ============================================ */
+.price-history-card {
+  margin-top: 24px;
+  padding: 20px;
+  background-color: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.price-history-card h3 {
+  font-size: 1rem;
+  margin-bottom: 16px;
+  color: var(--text-main);
+}
+
+/* ============================================
+   COMENTÁRIOS
+   ============================================ */
+.comment-item {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.comment-item.reply {
+  margin-left: 28px;
+  border-left: 2px solid var(--border);
+  padding-left: 16px;
+  border-bottom: none;
+  margin-top: 12px;
+}
+
+.comment-author-main {
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.comment-author-reply {
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.comment-vote-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.comment-vote-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.comment-vote-btn.active-up {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.comment-vote-btn.active-down {
+  background-color: #fef2f2;
+  border-color: var(--hot);
+  color: var(--hot);
+}
+
+html.dark .comment-vote-btn.active-down {
+  background-color: #450a0a;
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.comment-footer {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.btn-reply {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.btn-reply:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+.btn-delete-comment {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--hot);
+  font-size: 0.8rem;
+  font-family: inherit;
+  transition: color var(--transition-fast);
+}
+
+.btn-delete-comment:hover {
+  color: #b91c1c;
+  text-decoration: underline;
+}
+
+.reply-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.reply-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-main);
+  background-color: var(--surface);
+  transition: border-color var(--transition-fast);
+}
+
+.reply-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(22 163 74 / 0.15);
+}
+
+.comment-replies {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 8px;
 }
 
 @media (max-width: 768px) {

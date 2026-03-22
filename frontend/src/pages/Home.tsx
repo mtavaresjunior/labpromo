@@ -144,9 +144,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
             )}
           </div>
           {displayedDeals.length < filteredDeals.length && (
-            <div style={{ textAlign: 'center', marginTop: '24px', color: '#666' }}>
-              Carregando mais...
-            </div>
+            <div className="loading-state">Carregando mais...</div>
           )}
         </>
       )}

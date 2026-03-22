@@ -301,60 +301,54 @@ const DealPage: React.FC = () => {
     const replies = comments.filter(reply => reply.parent_id === c.id);
 
     return (
-      <div key={c.id} className="comment-item" style={{ marginBottom: depth === 0 ? '24px' : '0', marginLeft: depth === 0 ? '0' : '32px', borderLeft: depth === 0 ? 'none' : '2px solid #eee', paddingLeft: depth === 0 ? '0' : '16px' }}>
-        <div className="comment-author" style={{ fontWeight: 'bold', color: depth === 0 ? '#0056b3' : '#555' }}>
+      <div key={c.id} className={`comment-item${depth > 0 ? ' reply' : ''}`}>
+        <div className={depth === 0 ? 'comment-author-main' : 'comment-author-reply'}>
           {c.username}
         </div>
-        <div className="comment-content" style={{ marginTop: '4px' }}>{c.content}</div>
-        <div className="comment-actions" style={{ display: 'flex', gap: '8px', marginTop: '8px', alignItems: 'center' }}>
-          <button 
-            onClick={() => handleCommentVote(c.id, 'up')} 
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: userCommentVotes[c.id] === 1 ? '#e3f2fd' : 'none', border: '1px solid #ddd', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', color: userCommentVotes[c.id] === 1 ? '#0056b3' : '#555' }}
+        <div className="comment-content">{c.content}</div>
+        <div className="comment-actions">
+          <button
+            onClick={() => handleCommentVote(c.id, 'up')}
+            className={`comment-vote-btn${userCommentVotes[c.id] === 1 ? ' active-up' : ''}`}
             title="Gostei"
           >
             👍 {c.likes_count || 0}
           </button>
-          <button 
-            onClick={() => handleCommentVote(c.id, 'down')} 
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: userCommentVotes[c.id] === -1 ? '#ffebee' : 'none', border: '1px solid #ddd', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', color: userCommentVotes[c.id] === -1 ? '#d32f2f' : '#555' }}
+          <button
+            onClick={() => handleCommentVote(c.id, 'down')}
+            className={`comment-vote-btn${userCommentVotes[c.id] === -1 ? ' active-down' : ''}`}
             title="Não gostei"
           >
             👎 {c.dislikes_count || 0}
           </button>
         </div>
-        <div className="comment-footer" style={{ display: 'flex', gap: '16px', alignItems: 'center', fontSize: '0.8rem', color: '#666', marginTop: '8px' }}>
-          <div className="comment-date">{new Date(c.created_at).toLocaleDateString()}</div>
-          <button className="button-text" style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, color: '#0056b3' }} onClick={() => { setReplyingTo(replyingTo === c.id ? null : c.id); setReplyContent(''); }}>
+        <div className="comment-footer">
+          <span className="comment-date">{new Date(c.created_at).toLocaleDateString()}</span>
+          <button className="btn-reply" onClick={() => { setReplyingTo(replyingTo === c.id ? null : c.id); setReplyContent(''); }}>
             Responder
           </button>
           {(loggedInUser && (loggedInUser.id === c.user_id || loggedInUser.is_admin)) && (
-            <button 
-              className="button-text" 
-              style={{ color: '#dc3545', border: 'none', background: 'none', cursor: 'pointer', padding: 0 }} 
-              onClick={() => handleDeleteComment(c.id)}
-              title="Excluir Comentário"
-            >
-               🗑️ Excluir
+            <button className="btn-delete-comment" onClick={() => handleDeleteComment(c.id)} title="Excluir Comentário">
+              🗑️ Excluir
             </button>
           )}
         </div>
-        
+
         {replyingTo === c.id && (
-          <form onSubmit={(e) => handleReplySubmit(e, c.id)} style={{ marginTop: '12px', display: 'flex', gap: '8px', marginBottom: '16px' }}>
-            <input 
-              type="text" 
-              value={replyContent} 
-              onChange={e => setReplyContent(e.target.value)} 
-              placeholder="Escreva sua resposta..." 
-              style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          <form onSubmit={(e) => handleReplySubmit(e, c.id)} className="reply-form">
+            <input
+              type="text"
+              value={replyContent}
+              onChange={e => setReplyContent(e.target.value)}
+              placeholder="Escreva sua resposta..."
               autoFocus
             />
-            <button type="submit" className="button secondary" style={{ padding: '8px 16px' }}>Enviar</button>
+            <button type="submit" className="button secondary">Enviar</button>
           </form>
         )}
 
         {replies.length > 0 && (
-          <div className="comment-replies" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+          <div className="comment-replies">
             {replies.map(r => renderComment(r.id, depth + 1))}
           </div>
         )}
@@ -369,16 +363,16 @@ const DealPage: React.FC = () => {
       <div className="deal-details-card">
         <div className="deal-details-image" style={{ position: 'relative' }}>
           <img src={deal.image_url} alt={deal.title} referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x600/e2e8f0/475569?text=Sem+Foto'; }} />
-          <div className="deal-votes-container" style={{ position: 'absolute', bottom: '16px', right: '16px', display: 'flex', gap: '8px', background: 'rgba(255, 255, 255, 0.9)', padding: '8px 12px', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-            <button 
+          <div className="deal-votes-container">
+            <button
               onClick={() => handleDealVote('up')}
-              style={{ background: userDealVote === 1 ? '#e3f2fd' : 'none', border: 'none', display: 'flex', gap: '6px', alignItems: 'center', cursor: 'pointer', fontSize: '1rem', color: userDealVote === 1 ? '#0056b3' : '#333', padding: '4px 8px', borderRadius: '8px' }}
+              className={`vote-btn${userDealVote === 1 ? ' active-up' : ''}`}
             >
               👍 <strong>{deal.likes_count}</strong>
             </button>
-            <button 
+            <button
               onClick={() => handleDealVote('down')}
-              style={{ background: userDealVote === -1 ? '#ffebee' : 'none', border: 'none', display: 'flex', gap: '6px', alignItems: 'center', cursor: 'pointer', fontSize: '1rem', color: userDealVote === -1 ? '#d32f2f' : '#333', padding: '4px 8px', borderRadius: '8px' }}
+              className={`vote-btn${userDealVote === -1 ? ' active-down' : ''}`}
             >
               👎 <strong>{deal.dislikes_count}</strong>
             </button>
@@ -396,43 +390,39 @@ const DealPage: React.FC = () => {
           <div className="deal-meta-info">
              <span>Vendido por <strong>{deal.store_name}</strong></span>
              <span>Postado por <strong>{deal.username}</strong></span>
-             {deal.created_at && <span style={{ color: '#888', fontSize: '0.9rem' }}>• {formatTimeAgo(deal.created_at)}</span>}
+             {deal.created_at && <span className="deal-time-ago">• {formatTimeAgo(deal.created_at)}</span>}
           </div>
           
           <p className="deal-page-description">{deal.description}</p>
           
           {priceHistory.length > 0 && (
-            <div className="deal-price-history" style={{ marginTop: '24px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', color: '#1e293b' }}>Histórico de Preços</h3>
+            <div className="price-history-card">
+              <h3>Histórico de Preços</h3>
               <div style={{ width: '100%', height: 250 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={priceHistory} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="date" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
-                    <YAxis dataKey="preco" tick={{fontSize: 12}} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
-                    <Tooltip formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'Preço']} labelStyle={{color: '#333'}} />
-                    <Line type="monotone" dataKey="preco" stroke="#0056b3" strokeWidth={3} dot={{ r: 4, fill: '#0056b3' }} activeDot={{ r: 6 }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+                    <YAxis dataKey="preco" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
+                    <Tooltip formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'Preço']} />
+                    <Line type="monotone" dataKey="preco" stroke="#16a34a" strokeWidth={2.5} dot={{ r: 4, fill: '#16a34a' }} activeDot={{ r: 6 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
 
-          <div className="deal-page-actions" style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-            <button className={`button ${isFavorite ? 'secondary' : ''}`} onClick={toggleFavorite} style={{ flex: 1 }}>
-              {isFavorite ? '❤️ Remover dos Favoritos' : '🤍 Adicionar aos Favoritos'}
+          <div className="deal-page-actions">
+            <button className={`button${isFavorite ? ' secondary' : ''}`} onClick={toggleFavorite}>
+              {isFavorite ? '❤️ Remover dos Favoritos' : '🤍 Favoritar'}
             </button>
-            <button className="button" style={{ flex: 2 }} onClick={() => deal.link ? window.open(deal.link, '_blank') : alert('Link não disponível')}>
+            <button className="button" onClick={() => deal.link ? window.open(deal.link, '_blank') : alert('Link não disponível')}>
               Pegar Promoção
             </button>
             {(loggedInUser && (loggedInUser.id === deal.posted_by || loggedInUser.is_admin)) && (
               <>
-                <button className="button secondary" style={{ flex: 1 }} onClick={() => setIsEditing(true)}>
-                   ✏️ Editar
-                </button>
-                <button className="button" style={{ flex: 1, backgroundColor: '#dc3545', borderColor: '#dc3545' }} onClick={handleDeleteDeal}>
-                   🗑️ Excluir
-                </button>
+                <button className="button secondary" onClick={() => setIsEditing(true)}>✏️ Editar</button>
+                <button className="button btn-delete" onClick={handleDeleteDeal}>🗑️ Excluir</button>
               </>
             )}
           </div>

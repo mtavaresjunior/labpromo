@@ -22,9 +22,9 @@ const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, lik
     <div className="deal-card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       <div className="deal-image">
         <img src={image} alt={title} referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.src = 'https://placehold.co/300x300/e2e8f0/475569?text=Sem+Foto'; }} />
-        <div className="likes-dislikes-badge" style={{ position: 'absolute', bottom: '8px', right: '8px', display: 'flex', gap: '8px', background: 'rgba(255, 255, 255, 0.9)', padding: '4px 8px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          <span style={{ color: '#0056b3' }}>👍 {likesCount}</span>
-          <span style={{ color: '#e53935' }}>👎 {dislikesCount}</span>
+        <div className="likes-dislikes-badge">
+          <span className="badge-likes">👍 {likesCount}</span>
+          <span className="badge-dislikes">👎 {dislikesCount}</span>
         </div>
       </div>
       
@@ -38,7 +38,7 @@ const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, lik
         <div className="deal-meta">
           <span className="store">{store}</span>
           <span className="user">por {username}</span>
-          {createdAt && <span className="time-ago" style={{ color: '#888', fontSize: '0.85rem' }}>• {formatTimeAgo(createdAt)}</span>}
+          {createdAt && <span className="time-ago">• {formatTimeAgo(createdAt)}</span>}
         </div>
 
         <div className="deal-actions">
