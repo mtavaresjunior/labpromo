@@ -24,7 +24,7 @@ services:
       - PORT=5172
       # IMPORTANTE: Altere este valor para um segredo forte em produção
       - JWT_SECRET=${JWT_SECRET:-dev_secret_mude_em_producao_32chars}
-      - ALLOWED_ORIGINS=${VITE_API_URL:-http://localhost:5173}
+      - ALLOWED_ORIGINS=${FRONTEND_URL:-http://localhost:5173}
       - BACKEND_URL=${BACKEND_URL:-http://localhost:5172}
     depends_on:
       - db
