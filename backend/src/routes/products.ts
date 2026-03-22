@@ -4,8 +4,9 @@ import { authenticate, requireAdmin, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-function parseId(value: string): number | null {
-  const id = parseInt(value, 10);
+function parseId(value: string | string[]): number | null {
+  const str = Array.isArray(value) ? value[0] : value;
+  const id  = parseInt(str, 10);
   return isNaN(id) || id <= 0 ? null : id;
 }
 

@@ -11,6 +11,12 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET!;
 const BCRYPT_ROUNDS = 12;
 
+function parseId(value: string | string[]): number | null {
+  const str = Array.isArray(value) ? value[0] : value;
+  const id  = parseInt(str, 10);
+  return isNaN(id) || id <= 0 ? null : id;
+}
+
 // ─── Upload de avatar com validação ──────────────────────────────────────────
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE_MB = 3;
@@ -138,7 +144,8 @@ router.post('/register', async (req: Request, res: Response) => {
 
 // ─── UPLOAD DE AVATAR (autenticado, próprio perfil) ──────────────────────────
 router.post('/:id/avatar', authenticate, upload.single('avatar'), async (req: AuthRequest, res: Response) => {
-  const targetId = parseInt(req.params.id, 10);
+  const targetId = parseId(req.params.id);
+  if (!targetId) { res.status(400).json({ error: 'ID inválido' }); return; }
 
   // Apenas o próprio usuário pode alterar seu avatar
   if (req.user!.id !== targetId) {
@@ -167,7 +174,8 @@ router.post('/:id/avatar', authenticate, upload.single('avatar'), async (req: Au
 
 // ─── ATUALIZAR PERFIL (autenticado, próprio perfil) ──────────────────────────
 router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const targetId = parseInt(req.params.id, 10);
+  const targetId = parseId(req.params.id);
+  if (!targetId) { res.status(400).json({ error: 'ID inválido' }); return; }
 
   if (req.user!.id !== targetId) {
     res.status(403).json({ error: 'Sem permissão para alterar este perfil' });
@@ -212,8 +220,8 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 // ─── DEALS DO USUÁRIO (público) ───────────────────────────────────────────────
 router.get('/:id/deals', async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.id, 10);
-  if (isNaN(userId)) {
+  const userId = parseId(req.params.id);
+  if (!userId) {
     res.status(400).json({ error: 'ID inválido' });
     return;
   }
@@ -236,7 +244,8 @@ router.get('/:id/deals', async (req: Request, res: Response) => {
 
 // ─── FAVORITOS DO USUÁRIO (apenas o próprio usuário ou admin) ─────────────────
 router.get('/:id/favorites', authenticate, async (req: AuthRequest, res: Response) => {
-  const targetId = parseInt(req.params.id, 10);
+  const targetId = parseId(req.params.id);
+  if (!targetId) { res.status(400).json({ error: 'ID inválido' }); return; }
 
   if (req.user!.id !== targetId && !req.user!.is_admin) {
     res.status(403).json({ error: 'Sem permissão para ver estes favoritos' });
@@ -276,7 +285,8 @@ router.get('/', authenticate, requireAdmin, async (_req: Request, res: Response)
 
 // ─── ALTERNAR STATUS DE ADMIN (admin) ────────────────────────────────────────
 router.put('/:id/admin', authenticate, requireAdmin, async (req: AuthRequest, res: Response) => {
-  const targetId = parseInt(req.params.id, 10);
+  const targetId = parseId(req.params.id);
+  if (!targetId) { res.status(400).json({ error: 'ID inválido' }); return; }
   const { is_admin } = req.body;
 
   if (req.user!.id === targetId) {
@@ -299,7 +309,8 @@ router.put('/:id/admin', authenticate, requireAdmin, async (req: AuthRequest, re
 
 // ─── EXCLUIR USUÁRIO (admin) ──────────────────────────────────────────────────
 router.delete('/:id', authenticate, requireAdmin, async (req: AuthRequest, res: Response) => {
-  const targetId = parseInt(req.params.id, 10);
+  const targetId = parseId(req.params.id);
+  if (!targetId) { res.status(400).json({ error: 'ID inválido' }); return; }
 
   if (req.user!.id === targetId) {
     res.status(400).json({ error: 'Você não pode excluir sua própria conta por aqui' });
