@@ -23,6 +23,10 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isAdmin = user?.role === 'admin';
+
   const [productQuery, setProductQuery] = useState('');
   const [productSuggestions, setProductSuggestions] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -51,9 +55,6 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
     try {
       const url = import.meta.env.VITE_API_URL || 'http://localhost:5172/api';
       
-      // Get user from local storage
-      const userStr = localStorage.getItem('user');
-      const user = userStr ? JSON.parse(userStr) : null;
       if (!user) throw new Error('Você precisa estar logado para enviar uma promoção!');
 
       const method = initialData ? 'PUT' : 'POST';
@@ -62,6 +63,9 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
       let finalProductId = selectedProduct?.id || initialData?.product_id;
       
       if (!selectedProduct && productQuery.trim() !== '') {
+        if (!isAdmin) {
+          throw new Error('Apenas administradores podem criar novos produtos. Selecione um produto da lista ou deixe o campo em branco.');
+        }
         const prodRes = await fetch(`${url}/products`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -101,7 +105,7 @@ const CreateDealModal: React.FC<CreateDealModalProps> = ({ onClose, onCreated, i
 
         <form onSubmit={handleSubmit} className="modal-form grid">
           <div className="form-group full" style={{ position: 'relative' }}>
-            <label>Produto Associado (Busque ou digite para criar novo) - Opcional</label>
+            <label>Produto Associado ({isAdmin ? 'Busque ou digite para criar novo' : 'Busque um produto existente'}) - Opcional</label>
             <input 
               type="text" 
               placeholder="Ex: RTX 4060 Asus" 
