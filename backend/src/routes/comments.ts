@@ -57,6 +57,8 @@ router.post('/deal/:dealId', authenticate, async (req: AuthRequest, res: Respons
        RETURNING *`,
       [dealId, userId, content.trim(), parsedParentId]
     );
+    // Atualiza last_interaction_at do deal ao receber comentário
+    await pool.query('UPDATE deals SET last_interaction_at = NOW() WHERE id = $1', [dealId]);
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('[CREATE COMMENT]', err);

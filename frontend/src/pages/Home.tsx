@@ -18,6 +18,7 @@ interface Deal {
   comments_count?: number;
   category?: string;
   link?: string;
+  is_expired?: boolean;
 }
 
 interface HomeProps {
@@ -35,6 +36,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'avaliados' | 'recentes'>('recentes');
+  const [showExpired, setShowExpired] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
 
   // Scroll listener for infinite scroll
@@ -53,7 +55,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(12);
-  }, [searchQuery, category, store, filter]);
+  }, [searchQuery, category, store, filter, showExpired]);
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -89,6 +91,11 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
     filteredDeals = filteredDeals.filter(d => d.store_name === store);
   }
 
+  // Hide expired deals unless toggled on
+  if (!showExpired) {
+    filteredDeals = filteredDeals.filter(d => !d.is_expired);
+  }
+
   // Apply sorting filter
   if (filter === 'avaliados') {
     filteredDeals.sort((a, b) => (b.likes_count - b.dislikes_count) - (a.likes_count - a.dislikes_count));
@@ -103,14 +110,18 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
       <header className="feed-header">
         <h2>{searchQuery ? `Resultados para "${searchQuery}"` : category}</h2>
         <div className="filters">
-          <button 
+          <button
             className={`filter-btn ${filter === 'recentes' ? 'active' : ''}`}
             onClick={() => setFilter('recentes')}
           >Mais recentes</button>
-          <button 
+          <button
             className={`filter-btn ${filter === 'avaliados' ? 'active' : ''}`}
             onClick={() => setFilter('avaliados')}
           >Melhores avaliados</button>
+          <button
+            className={`filter-btn filter-btn-expired ${showExpired ? 'active' : ''}`}
+            onClick={() => setShowExpired(v => !v)}
+          >{showExpired ? '⚠ Ocultar expiradas' : '⚠ Exibir expiradas'}</button>
         </div>
       </header>
 
@@ -137,6 +148,7 @@ const Home: React.FC<HomeProps> = ({ searchQuery, category, store }) => {
                     commentsCount={deal.comments_count || 0}
                     link={deal.link}
                     createdAt={deal.created_at}
+                    isExpired={deal.is_expired}
                     onClick={() => navigate(`/deal/${deal.id}`)}
                   />
                 </div>

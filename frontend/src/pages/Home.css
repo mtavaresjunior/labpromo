@@ -50,6 +50,23 @@
   border-color: var(--primary);
 }
 
+.filter-btn-expired {
+  color: #6b7280;
+  border-color: #9ca3af;
+  white-space: nowrap;
+}
+
+.filter-btn-expired:hover {
+  border-color: #6b7280;
+  color: #374151;
+}
+
+.filter-btn-expired.active {
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
+}
+
 .deals-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

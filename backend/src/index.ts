@@ -27,6 +27,7 @@ pool.connect()
   .then(() => {
     console.log('Conectado ao PostgreSQL');
     migratePasswordsIfNeeded();
+    runSchemaMigrations();
   })
   .catch((err: Error) => {
     console.error('Erro de conexão com o banco:', err.message);
@@ -49,6 +50,25 @@ async function migratePasswordsIfNeeded(): Promise<void> {
     }
   } catch (err) {
     // Tabela pode não existir ainda na primeira inicialização — ignora silenciosamente
+  }
+}
+
+/**
+ * Migrações de schema: adiciona colunas/índices que podem não existir em instâncias antigas.
+ */
+async function runSchemaMigrations(): Promise<void> {
+  try {
+    await pool.query(`
+      ALTER TABLE deals
+        ADD COLUMN IF NOT EXISTS last_interaction_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `);
+    // Inicializa last_interaction_at com created_at para registros antigos
+    await pool.query(`
+      UPDATE deals SET last_interaction_at = created_at
+      WHERE last_interaction_at IS NULL
+    `);
+  } catch (err) {
+    console.error('[MIGRATION] Erro ao executar migrações de schema:', (err as Error).message);
   }
 }
 

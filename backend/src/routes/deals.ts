@@ -19,7 +19,12 @@ router.get('/', async (req: Request, res: Response) => {
 
     let queryStr = `
       SELECT deals.*, users.username,
-             (SELECT COUNT(*) FROM comments WHERE comments.deal_id = deals.id) AS comments_count
+             (SELECT COUNT(*) FROM comments WHERE comments.deal_id = deals.id) AS comments_count,
+             (
+               (deals.dislikes_count >= 10 AND deals.dislikes_count > deals.likes_count * 3)
+               OR
+               EXTRACT(EPOCH FROM (NOW() - COALESCE(deals.last_interaction_at, deals.created_at))) > 86400
+             ) AS is_expired
       FROM deals
       JOIN users ON deals.posted_by = users.id
       ORDER BY created_at DESC
@@ -206,14 +211,20 @@ router.post('/:id/vote', authenticate, async (req: AuthRequest, res: Response) =
       } else {
         // Troca o voto
         await pool.query('UPDATE deal_votes SET vote_type = $1 WHERE user_id = $2 AND deal_id = $3', [voteType, userId, dealId]);
-        if (voteType === 1) await pool.query('UPDATE deals SET likes_count = likes_count + 1, dislikes_count = dislikes_count - 1 WHERE id = $1', [dealId]);
-        else await pool.query('UPDATE deals SET dislikes_count = dislikes_count + 1, likes_count = likes_count - 1 WHERE id = $1', [dealId]);
+        if (voteType === 1) {
+          await pool.query('UPDATE deals SET likes_count = likes_count + 1, dislikes_count = dislikes_count - 1, last_interaction_at = NOW() WHERE id = $1', [dealId]);
+        } else {
+          await pool.query('UPDATE deals SET dislikes_count = dislikes_count + 1, likes_count = likes_count - 1 WHERE id = $1', [dealId]);
+        }
       }
     } else {
       // Novo voto
       await pool.query('INSERT INTO deal_votes (user_id, deal_id, vote_type) VALUES ($1, $2, $3)', [userId, dealId, voteType]);
-      if (voteType === 1) await pool.query('UPDATE deals SET likes_count = likes_count + 1 WHERE id = $1', [dealId]);
-      else await pool.query('UPDATE deals SET dislikes_count = dislikes_count + 1 WHERE id = $1', [dealId]);
+      if (voteType === 1) {
+        await pool.query('UPDATE deals SET likes_count = likes_count + 1, last_interaction_at = NOW() WHERE id = $1', [dealId]);
+      } else {
+        await pool.query('UPDATE deals SET dislikes_count = dislikes_count + 1 WHERE id = $1', [dealId]);
+      }
     }
 
     const result = await pool.query('SELECT * FROM deals WHERE id = $1', [dealId]);

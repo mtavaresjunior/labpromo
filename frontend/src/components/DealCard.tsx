@@ -15,19 +15,31 @@ interface DealProps {
   onClick?: () => void;
   link?: string;
   createdAt?: string;
+  isExpired?: boolean;
 }
 
-const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, likesCount = 0, dislikesCount = 0, store, username, commentsCount, onClick, link, createdAt }) => {
+const DealCard: React.FC<DealProps> = ({ title, price, originalPrice, image, likesCount = 0, dislikesCount = 0, store, username, commentsCount, onClick, link, createdAt, isExpired = false }) => {
   return (
-    <div className="deal-card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
+    <div className={`deal-card${isExpired ? ' deal-expired' : ''}`} onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       <div className="deal-image">
-        <img src={image} alt={title} referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.src = 'https://placehold.co/300x300/e2e8f0/475569?text=Sem+Foto'; }} />
+        <img
+          src={image}
+          alt={title}
+          referrerPolicy="no-referrer"
+          style={isExpired ? { filter: 'grayscale(100%)' } : undefined}
+          onError={(e) => { e.currentTarget.src = 'https://placehold.co/300x300/e2e8f0/475569?text=Sem+Foto'; }}
+        />
+        {isExpired && (
+          <div className="expired-badge">
+            <span>⚠ Expirada</span>
+          </div>
+        )}
         <div className="likes-dislikes-badge">
           <span className="badge-likes">👍 {likesCount}</span>
           <span className="badge-dislikes">👎 {dislikesCount}</span>
         </div>
       </div>
-      
+
       <div className="deal-content">
         <h3 className="deal-title">{title}</h3>
         <div className="deal-prices">
